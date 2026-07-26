@@ -44,12 +44,20 @@ from app.repositories.upload_repository import UploadRepository
 from app.repositories.user_repository import UserRepository
 from app.repositories.version_repository import VersionRepository
 
+from app.repositories.knowledge_repository import (
+    EmbeddingJobRepository,
+    EmbeddingModelRepository,
+    SearchHistoryRepository,
+)
+
 __all__ = [
     "AuditRepository",
     "BaseRepository",
     "DocumentChunkRepository",
     "DocumentContentRepository",
     "DocumentRepository",
+    "EmbeddingJobRepository",
+    "EmbeddingModelRepository",
     "ExtractedImageRepository",
     "ExtractedTableRepository",
     "MetadataRepository",
@@ -57,6 +65,7 @@ __all__ = [
     "ProcessingJobRepository",
     "RefreshTokenRepository",
     "RoleRepository",
+    "SearchHistoryRepository",
     "SessionRepository",
     "UploadRepository",
     "UserRepository",

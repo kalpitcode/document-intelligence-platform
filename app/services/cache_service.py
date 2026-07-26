@@ -183,3 +183,27 @@ class CacheService:
             await client.delete(key)
         except Exception:
             _in_memory_store.pop(key, None)
+
+    @staticmethod
+    async def get(key: str) -> Any:
+        """Generic get cached JSON / value by key."""
+        import json
+        try:
+            client = redis_manager.get_client()
+            val = await client.get(key)
+            return json.loads(val) if val else None
+        except Exception:
+            val_str = _in_memory_store.get(key)
+            return json.loads(val_str) if val_str else None
+
+    @staticmethod
+    async def set(key: str, value: Any, ttl: int = 3600) -> None:
+        """Generic set cached JSON / value by key."""
+        import json
+        val_str = json.dumps(value)
+        try:
+            client = redis_manager.get_client()
+            await client.setex(key, ttl, val_str)
+        except Exception:
+            _in_memory_store[key] = val_str
+

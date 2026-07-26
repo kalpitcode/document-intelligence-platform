@@ -58,6 +58,12 @@ from app.services.user_service import UserService
 from app.services.validation_service import ValidationService
 from app.services.version_service import VersionService
 
+from app.services.embedding_service import EmbeddingService
+from app.services.hybrid_search_service import HybridSearchService
+from app.services.knowledge_orchestration_service import KnowledgeOrchestrationService
+from app.services.reranking_service import RerankingService
+from app.services.vector_service import VectorService
+
 __all__ = [
     "AuditService",
     "AuthService",
@@ -68,12 +74,16 @@ __all__ = [
     "DocumentProcessingService",
     "DocumentService",
     "EmailService",
+    "EmbeddingService",
+    "HybridSearchService",
     "ImageExtractionService",
+    "KnowledgeOrchestrationService",
     "LanguageDetectionService",
     "MetadataService",
     "OCRService",
     "PasswordService",
     "PermissionService",
+    "RerankingService",
     "RoleService",
     "StorageService",
     "TableExtractionService",
@@ -82,5 +92,6 @@ __all__ = [
     "UploadService",
     "UserService",
     "ValidationService",
+    "VectorService",
     "VersionService",
 ]

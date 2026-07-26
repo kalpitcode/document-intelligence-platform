@@ -43,6 +43,13 @@ from app.models.session import UserSessionModel
 from app.models.token import RefreshTokenModel
 from app.models.user import UserModel, user_roles
 
+from app.models.knowledge import (
+    EmbeddingJobModel,
+    EmbeddingJobStatus,
+    EmbeddingModelModel,
+    SearchHistoryModel,
+)
+
 __all__ = [
     "AuditLogModel",
     "DocumentChunkModel",
@@ -53,6 +60,9 @@ __all__ = [
     "DocumentStatus",
     "DocumentTagModel",
     "DocumentVersionModel",
+    "EmbeddingJobModel",
+    "EmbeddingJobStatus",
+    "EmbeddingModelModel",
     "ExtractedImageModel",
     "ExtractedTableModel",
     "PermissionModel",
@@ -60,6 +70,7 @@ __all__ = [
     "ProcessingStatus",
     "RefreshTokenModel",
     "RoleModel",
+    "SearchHistoryModel",
     "UploadSessionModel",
     "UserModel",
     "UserSessionModel",

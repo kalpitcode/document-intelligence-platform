@@ -38,6 +38,19 @@ from app.schemas.processing import (
 )
 from app.schemas.user import PermissionResponse, RoleResponse, UpdateProfileRequest, UserResponse
 
+from app.schemas.knowledge import (
+    EmbeddingModelResponse,
+    QueryTypeEnum,
+    ReindexRequest,
+    ReindexResponse,
+    SearchFilterSchema,
+    SearchHistoryItemResponse,
+    SearchHistoryListResponse,
+    SearchRequest,
+    SearchResponse,
+    SearchResultItem,
+)
+
 __all__ = [
     "APIErrorResponse",
     "APIResponse",
@@ -50,6 +63,7 @@ __all__ = [
     "DocumentTagResponse",
     "DocumentUpdate",
     "DocumentVersionResponse",
+    "EmbeddingModelResponse",
     "ExtractedImageResponse",
     "ExtractedTableResponse",
     "ForgotPasswordRequest",
@@ -57,11 +71,20 @@ __all__ = [
     "PermissionResponse",
     "ProcessTriggerResponse",
     "ProcessingJobResponse",
+    "QueryTypeEnum",
     "RefreshTokenRequest",
     "RegisterRequest",
+    "ReindexRequest",
+    "ReindexResponse",
     "ResendVerificationRequest",
     "ResetPasswordRequest",
     "RoleResponse",
+    "SearchFilterSchema",
+    "SearchHistoryItemResponse",
+    "SearchHistoryListResponse",
+    "SearchRequest",
+    "SearchResponse",
+    "SearchResultItem",
     "TokenResponse",
     "UpdateProfileRequest",
     "UploadSessionResponse",

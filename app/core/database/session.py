@@ -139,6 +139,31 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 get_async_session = get_db_session
 
 
+class AsyncSessionLocal:
+    """
+    Async context manager providing database session outside HTTP request context (e.g. Celery tasks).
+    """
+
+    def __init__(self) -> None:
+        if _session_factory is None:
+            # Fallback initialization for worker background processes
+            from app.core.config import get_settings
+            settings = get_settings()
+            engine = create_async_engine(settings.database_url, echo=settings.postgres_echo)
+            factory = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+            self._session = factory()
+        else:
+            self._session = _session_factory()
+
+    async def __aenter__(self) -> AsyncSession:
+        return self._session
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        if exc_type is not None:
+            await self._session.rollback()
+        await self._session.close()
+
+
 async def check_db_health() -> dict[str, Any]:
     """
     Verify database connectivity for the health endpoint.

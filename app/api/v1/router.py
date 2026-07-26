@@ -14,6 +14,7 @@ from app.api.v1.endpoints.documents import router as documents_router
 from app.api.v1.endpoints.health import router as health_router
 from app.api.v1.endpoints.processing import router as processing_router
 from app.api.v1.endpoints.root import router as root_router
+from app.api.v1.endpoints.search import router as search_router
 from app.api.v1.endpoints.users import router as users_router
 
 # Create the v1 API router
@@ -26,3 +27,4 @@ api_v1_router.include_router(auth_router)
 api_v1_router.include_router(users_router)
 api_v1_router.include_router(documents_router)
 api_v1_router.include_router(processing_router)
+api_v1_router.include_router(search_router)

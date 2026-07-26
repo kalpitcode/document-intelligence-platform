@@ -191,6 +191,49 @@ class ImageExtracted(BaseDomainEvent):
     storage_path: str = ""
 
 
+@dataclass(frozen=True)
+class EmbeddingStarted(BaseDomainEvent):
+    """Event emitted when chunk vector embedding generation starts."""
+
+    document_id: str = ""
+    job_id: str = ""
+    embedding_model: str = ""
+
+
+@dataclass(frozen=True)
+class EmbeddingCompleted(BaseDomainEvent):
+    """Event emitted when chunk vector embedding generation finishes successfully."""
+
+    document_id: str = ""
+    job_id: str = ""
+    chunk_count: int = 0
+    duration_ms: int = 0
+
+
+@dataclass(frozen=True)
+class EmbeddingFailed(BaseDomainEvent):
+    """Event emitted when chunk vector embedding generation fails."""
+
+    document_id: str = ""
+    job_id: str = ""
+    reason: str = ""
+
+
+@dataclass(frozen=True)
+class DocumentIndexed(BaseDomainEvent):
+    """Event emitted when document chunk vectors are indexed in Qdrant."""
+
+    document_id: str = ""
+    indexed_chunks: int = 0
+
+
+@dataclass(frozen=True)
+class DocumentRemovedFromIndex(BaseDomainEvent):
+    """Event emitted when document vectors are purged from Qdrant vector store."""
+
+    document_id: str = ""
+
+
 EventType = TypeVar("EventType", bound=BaseDomainEvent)
 
 
