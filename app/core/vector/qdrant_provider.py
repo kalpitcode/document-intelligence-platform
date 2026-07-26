@@ -39,13 +39,17 @@ except ImportError:
 _memory_vector_store: dict[str, list[dict[str, Any]]] = {}
 
 
-def _cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
-    """Calculate cosine similarity between two float vectors."""
-    if not vec_a or not vec_b or len(vec_a) != len(vec_b):
+def _cosine_similarity(vec_a: Any, vec_b: Any) -> float:
+    """Calculate cosine similarity between two vectors safely (supports lists and numpy arrays)."""
+    if vec_a is None or vec_b is None:
         return 0.0
-    dot = sum(a * b for a, b in zip(vec_a, vec_b))
-    norm_a = math.sqrt(sum(a * a for a in vec_a))
-    norm_b = math.sqrt(sum(b * b for b in vec_b))
+    a_list = vec_a.tolist() if hasattr(vec_a, "tolist") else vec_a
+    b_list = vec_b.tolist() if hasattr(vec_b, "tolist") else vec_b
+    if not a_list or not b_list or len(a_list) != len(b_list):
+        return 0.0
+    dot = sum(a * b for a, b in zip(a_list, b_list))
+    norm_a = math.sqrt(sum(a * a for a in a_list))
+    norm_b = math.sqrt(sum(b * b for b in b_list))
     if norm_a == 0.0 or norm_b == 0.0:
         return 0.0
     return dot / (norm_a * norm_b)
@@ -182,7 +186,7 @@ class QdrantProvider:
 
     async def search_vectors(
         self,
-        query_vector: list[float],
+        query_vector: list[float] | Any,
         limit: int = 20,
         filters: dict[str, Any] | None = None,
         score_threshold: float | None = None,
@@ -193,6 +197,9 @@ class QdrantProvider:
 
         Returns list of match dicts: `{"id": str, "score": float, "payload": dict}`.
         """
+        if hasattr(query_vector, "tolist"):
+            query_vector = query_vector.tolist()
+
         name = collection_name or self.collection_name
         if self._is_online and self.client and rest_models:
             try:
@@ -250,10 +257,11 @@ class QdrantProvider:
                     if f_val is not None:
                         val_in_payload = payload.get(f_key)
                         if isinstance(f_val, list):
-                            if val_in_payload not in f_val:
+                            str_list = [str(x) for x in f_val]
+                            if str(val_in_payload) not in str_list:
                                 match_filter = False
                                 break
-                        elif val_in_payload != f_val:
+                        elif str(val_in_payload) != str(f_val):
                             match_filter = False
                             break
                 if not match_filter:

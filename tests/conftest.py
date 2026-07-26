@@ -38,6 +38,13 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     loop.close()
 
 
+@pytest.fixture(autouse=True)
+def reset_vector_store() -> None:
+    """Clear in-memory vector store between tests for isolation."""
+    from app.core.vector.qdrant_provider import _memory_vector_store
+    _memory_vector_store.clear()
+
+
 @pytest.fixture(scope="session")
 def test_settings() -> Any:
     """Get test-specific settings."""

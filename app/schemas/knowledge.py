@@ -80,11 +80,31 @@ class SearchResultItem(BaseModel):
     document_id: str = Field(..., description="Parent Document ID")
     owner_id: str | None = Field(default=None, description="Document Owner User ID")
     score: float = Field(..., description="Normalized match score [0.0 - 1.0]")
-    page_number: int = Field(default=1, description="Page number where chunk appears")
-    chunk_index: int = Field(default=0, description="Sequential chunk index")
+    page_number: int | None = Field(default=1, description="Page number where chunk appears")
+    chunk_index: int | None = Field(default=0, description="Sequential chunk index")
     snippet: str = Field(..., description="Clean text snippet preview")
     highlighted_text: str = Field(..., description="HTML/Marked highlighted query term snippet")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Document metadata properties")
+
+    @field_validator("page_number", mode="before")
+    @classmethod
+    def sanitize_page_number(cls, v: Any) -> int:
+        if v is None:
+            return 1
+        try:
+            return int(v)
+        except (ValueError, TypeError):
+            return 1
+
+    @field_validator("chunk_index", mode="before")
+    @classmethod
+    def sanitize_chunk_index(cls, v: Any) -> int:
+        if v is None:
+            return 0
+        try:
+            return int(v)
+        except (ValueError, TypeError):
+            return 0
 
 
 class SearchResponse(BaseModel):

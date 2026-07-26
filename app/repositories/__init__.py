@@ -56,7 +56,15 @@ from app.repositories.rag_repository import (
     PromptTemplateRepository,
 )
 
+from app.repositories.ai_repository import (
+    AIJobRepository,
+    AIResultRepository,
+    FeatureTemplateRepository,
+)
+
 __all__ = [
+    "AIJobRepository",
+    "AIResultRepository",
     "AuditRepository",
     "BaseRepository",
     "ChatMessageRepository",
@@ -68,6 +76,7 @@ __all__ = [
     "EmbeddingModelRepository",
     "ExtractedImageRepository",
     "ExtractedTableRepository",
+    "FeatureTemplateRepository",
     "LLMUsageLogRepository",
     "MetadataRepository",
     "PermissionRepository",

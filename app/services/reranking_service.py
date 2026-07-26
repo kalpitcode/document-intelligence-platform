@@ -63,12 +63,12 @@ class RerankingService:
             highlighted_text = self.highlight_terms(text_snippet, query_terms)
 
             reranked.append({
-                "chunk_id": payload.get("chunk_id", cand.get("id")),
-                "document_id": payload.get("document_id"),
-                "owner_id": payload.get("owner_id"),
+                "chunk_id": str(payload.get("chunk_id") or cand.get("id") or ""),
+                "document_id": str(payload.get("document_id") or ""),
+                "owner_id": str(payload.get("owner_id")) if payload.get("owner_id") is not None else None,
                 "score": final_score,
-                "page_number": payload.get("page_number", 1),
-                "chunk_index": payload.get("chunk_index", 0),
+                "page_number": payload.get("page_number") or 1,
+                "chunk_index": payload.get("chunk_index") or 0,
                 "snippet": text_snippet[:300] + ("..." if len(text_snippet) > 300 else ""),
                 "highlighted_text": highlighted_text,
                 "metadata": {

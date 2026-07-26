@@ -153,3 +153,8 @@ def retry_failed_embedding_jobs_task() -> dict[str, Any]:
     """Background cron task retrying failed embedding jobs."""
     logger.info("Executing retry_failed_embedding_jobs_task")
     return {"retried_jobs_count": 0}
+
+
+# Task name aliases for backward compatibility and clean exports
+index_document_embeddings_task = generate_embeddings_task
+delete_document_embeddings_task = delete_embeddings_task

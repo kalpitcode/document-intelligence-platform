@@ -69,18 +69,29 @@ from app.services.llm_service import LLMService
 from app.services.prompt_builder_service import PromptBuilderService
 from app.services.rag_service import RAGService
 
+from app.services.ai_orchestrator import AIFeatureOrchestrator
+from app.services.analysis_service import AnalysisService
+from app.services.classification_service import ClassificationService
+from app.services.extraction_service import ExtractionService
+from app.services.summarization_service import SummarizationService
+from app.services.translation_service import TranslationService
+
 __all__ = [
+    "AIFeatureOrchestrator",
+    "AnalysisService",
     "AuditService",
     "AuthService",
     "CacheService",
     "ChecksumService",
     "ChunkingService",
+    "ClassificationService",
     "ContentCleaningService",
     "ContextRetrievalService",
     "DocumentProcessingService",
     "DocumentService",
     "EmailService",
     "EmbeddingService",
+    "ExtractionService",
     "HybridSearchService",
     "ImageExtractionService",
     "KnowledgeOrchestrationService",
@@ -95,9 +106,11 @@ __all__ = [
     "RerankingService",
     "RoleService",
     "StorageService",
+    "SummarizationService",
     "TableExtractionService",
     "TextExtractionService",
     "TokenService",
+    "TranslationService",
     "UploadService",
     "UserService",
     "ValidationService",

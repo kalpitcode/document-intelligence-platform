@@ -56,7 +56,19 @@ from app.models.rag import (
     PromptTemplateModel,
 )
 
+from app.models.ai import (
+    AIFeatureType,
+    AIJobModel,
+    AIJobStatus,
+    AIResultModel,
+    FeatureTemplateModel,
+)
+
 __all__ = [
+    "AIFeatureType",
+    "AIJobModel",
+    "AIJobStatus",
+    "AIResultModel",
     "AuditLogModel",
     "ChatMessageModel",
     "ChatSessionModel",
@@ -73,6 +85,7 @@ __all__ = [
     "EmbeddingModelModel",
     "ExtractedImageModel",
     "ExtractedTableModel",
+    "FeatureTemplateModel",
     "LLMUsageLogModel",
     "PermissionModel",
     "ProcessingJobModel",

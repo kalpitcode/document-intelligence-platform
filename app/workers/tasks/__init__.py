@@ -1,24 +1,32 @@
 """
-Celery Tasks Package
-=====================
+Tasks Package
+=============
 
-All Celery tasks are defined in modules within this package.
-Tasks are automatically discovered by the Celery app via `autodiscover_tasks`.
-
-No business tasks are implemented yet — this package serves as the
-registration point for future task modules.
-
-To add a new task:
-1. Create a new module in this package (e.g., `document_tasks.py`).
-2. Define tasks using the `@celery_app.task` decorator.
-3. The task will be auto-discovered on worker startup.
-
-Example::
-
-    # app/workers/tasks/document_tasks.py
-    from app.workers.celery_app import celery_app
-
-    @celery_app.task(bind=True, max_retries=3)
-    def process_document(self, document_id: str) -> dict:
-        ...
+Exported Celery worker tasks for document processing, knowledge indexing, RAG, and AI features.
 """
+
+from __future__ import annotations
+
+from app.workers.tasks.ai_tasks import (
+    analyze_document_task,
+    extract_entities_task,
+    generate_summary_task,
+    retry_failed_ai_jobs_task,
+    run_classification_task,
+    translate_document_task,
+)
+from app.workers.tasks.knowledge_tasks import (
+    delete_document_embeddings_task,
+    index_document_embeddings_task,
+)
+
+__all__ = [
+    "analyze_document_task",
+    "delete_document_embeddings_task",
+    "extract_entities_task",
+    "generate_summary_task",
+    "index_document_embeddings_task",
+    "retry_failed_ai_jobs_task",
+    "run_classification_task",
+    "translate_document_task",
+]

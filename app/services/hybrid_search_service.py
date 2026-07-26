@@ -162,7 +162,8 @@ class HybridSearchService:
 
         if BM25_AVAILABLE and BM25Okapi is not None:
             bm25 = BM25Okapi(corpus_tokens)
-            scores = bm25.get_scores(query_tokens)
+            raw_scores = bm25.get_scores(query_tokens)
+            scores = raw_scores.tolist() if hasattr(raw_scores, "tolist") else [float(s) for s in raw_scores]
         else:
             # Fallback term frequency scorer
             scores = []
@@ -261,7 +262,14 @@ class HybridSearchService:
 
     def _is_user_admin(self, user: UserModel) -> bool:
         """Check if user has administrative privileges."""
-        if not hasattr(user, "roles") or not user.roles:
+        is_super = getattr(user, "is_superuser", False)
+        if isinstance(is_super, bool) and is_super:
+            return True
+        roles = getattr(user, "roles", None)
+        if not roles or not isinstance(roles, (list, set, tuple)):
             return False
-        role_names = {r.name.upper() for r in user.roles}
-        return bool(role_names.intersection({"ADMIN", "MANAGER", "SUPER_ADMIN"}))
+        try:
+            role_names = {getattr(r, "name", "").upper() for r in roles}
+            return bool(role_names.intersection({"ADMIN", "MANAGER", "SUPER_ADMIN"}))
+        except Exception:
+            return False
