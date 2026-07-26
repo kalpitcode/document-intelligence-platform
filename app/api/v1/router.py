@@ -18,6 +18,7 @@ from app.api.v1.endpoints.processing import router as processing_router
 from app.api.v1.endpoints.root import router as root_router
 from app.api.v1.endpoints.search import router as search_router
 from app.api.v1.endpoints.users import router as users_router
+from app.api.v1.endpoints.workflows import router as workflows_router
 
 # Create the v1 API router
 api_v1_router = APIRouter()
@@ -32,3 +33,4 @@ api_v1_router.include_router(processing_router)
 api_v1_router.include_router(search_router)
 api_v1_router.include_router(chat_router)
 api_v1_router.include_router(ai_router)
+api_v1_router.include_router(workflows_router)

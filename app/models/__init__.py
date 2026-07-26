@@ -64,6 +64,14 @@ from app.models.ai import (
     FeatureTemplateModel,
 )
 
+from app.models.workflow import (
+    WorkflowEventModel,
+    WorkflowRunModel,
+    WorkflowScheduleModel,
+    WorkflowStepModel,
+    WorkflowTemplateModel,
+)
+
 __all__ = [
     "AIFeatureType",
     "AIJobModel",
@@ -98,6 +106,11 @@ __all__ = [
     "UserModel",
     "UserSessionModel",
     "Visibility",
+    "WorkflowEventModel",
+    "WorkflowRunModel",
+    "WorkflowScheduleModel",
+    "WorkflowStepModel",
+    "WorkflowTemplateModel",
     "document_tags",
     "role_permissions",
     "user_roles",

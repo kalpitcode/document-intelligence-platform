@@ -76,6 +76,14 @@ from app.services.extraction_service import ExtractionService
 from app.services.summarization_service import SummarizationService
 from app.services.translation_service import TranslationService
 
+from app.services.workflow_engine import (
+    WorkflowEngine,
+    WorkflowExecutionError,
+    WorkflowValidationError,
+)
+from app.services.workflow_orchestrator import WorkflowOrchestrator
+from app.services.workflow_scheduler_service import WorkflowSchedulerService
+
 __all__ = [
     "AIFeatureOrchestrator",
     "AnalysisService",
@@ -116,4 +124,9 @@ __all__ = [
     "ValidationService",
     "VectorService",
     "VersionService",
+    "WorkflowEngine",
+    "WorkflowExecutionError",
+    "WorkflowOrchestrator",
+    "WorkflowSchedulerService",
+    "WorkflowValidationError",
 ]

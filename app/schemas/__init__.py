@@ -79,6 +79,23 @@ from app.schemas.ai import (
     TranslateResponse,
 )
 
+from app.schemas.workflow import (
+    CreateWorkflowScheduleRequest,
+    CreateWorkflowTemplateRequest,
+    ExecuteWorkflowRequest,
+    StepConditionSchema,
+    StepRetryPolicySchema,
+    WorkflowDefinitionSchema,
+    WorkflowEventResponse,
+    WorkflowRunListResponse,
+    WorkflowRunResponse,
+    WorkflowScheduleResponse,
+    WorkflowStepDefinitionSchema,
+    WorkflowStepResponse,
+    WorkflowTemplateListResponse,
+    WorkflowTemplateResponse,
+)
+
 __all__ = [
     "AIJobResponse",
     "AIResultResponse",
@@ -94,6 +111,8 @@ __all__ = [
     "CitationItem",
     "ClassifyRequest",
     "ClassifyResponse",
+    "CreateWorkflowScheduleRequest",
+    "CreateWorkflowTemplateRequest",
     "DocumentChunkResponse",
     "DocumentContentResponse",
     "DocumentDownloadResponse",
@@ -103,6 +122,7 @@ __all__ = [
     "DocumentUpdate",
     "DocumentVersionResponse",
     "EmbeddingModelResponse",
+    "ExecuteWorkflowRequest",
     "ExtractRequest",
     "ExtractResponse",
     "ExtractedImageResponse",
@@ -130,6 +150,8 @@ __all__ = [
     "SearchRequest",
     "SearchResponse",
     "SearchResultItem",
+    "StepConditionSchema",
+    "StepRetryPolicySchema",
     "SummarizeRequest",
     "SummarizeResponse",
     "SummaryTypeEnum",
@@ -141,4 +163,13 @@ __all__ = [
     "UploadSessionResponse",
     "UserResponse",
     "VerifyEmailRequest",
+    "WorkflowDefinitionSchema",
+    "WorkflowEventResponse",
+    "WorkflowRunListResponse",
+    "WorkflowRunResponse",
+    "WorkflowScheduleResponse",
+    "WorkflowStepDefinitionSchema",
+    "WorkflowStepResponse",
+    "WorkflowTemplateListResponse",
+    "WorkflowTemplateResponse",
 ]

@@ -62,6 +62,8 @@ from app.repositories.ai_repository import (
     FeatureTemplateRepository,
 )
 
+from app.repositories.workflow_repository import WorkflowRepository
+
 __all__ = [
     "AIJobRepository",
     "AIResultRepository",
@@ -89,4 +91,5 @@ __all__ = [
     "UploadRepository",
     "UserRepository",
     "VersionRepository",
+    "WorkflowRepository",
 ]
