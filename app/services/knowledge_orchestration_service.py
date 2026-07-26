@@ -38,6 +38,7 @@ from app.repositories.knowledge_repository import (
     SearchHistoryRepository,
 )
 from app.repositories.processing_repository import DocumentChunkRepository
+from app.schemas.knowledge import SearchResponse, SearchResultItem
 from app.services.embedding_service import EmbeddingService
 from app.services.hybrid_search_service import HybridSearchService
 from app.services.reranking_service import RerankingService
@@ -162,9 +163,9 @@ class KnowledgeOrchestrationService:
                         "page_number": getattr(chunk, "page_number", 1) or 1,
                         "text_snippet": chunk.content,
                         "token_estimate": chunk.token_estimate,
-                        "visibility": str(doc.visibility),
-                        "mime_type": str(doc.mime_type),
-                        "original_filename": str(doc.original_filename),
+                        "visibility": doc.visibility if isinstance(doc.visibility, str) else str(doc.visibility),
+                        "mime_type": doc.mime_type if isinstance(doc.mime_type, str) else str(doc.mime_type),
+                        "original_filename": doc.original_filename if isinstance(doc.original_filename, str) else str(doc.original_filename),
                         "language": getattr(doc.content_record, "language", "en") if getattr(doc, "content_record", None) else "en",
                     },
                 })
@@ -296,11 +297,10 @@ class KnowledgeOrchestrationService:
         """
         Unified search endpoint for RAG ContextRetrievalService.
         """
-        from app.schemas.knowledge import SearchResponse, SearchResultItem
         start_time = time.time()
-        
+
         # Build dummy or real user model for access check
-        u_id = uuid.UUID(str(user_id)) if isinstance(user_id, str) else user_id
+        u_id = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
         current_user = UserModel(id=u_id, email="rag_user@blackrock.com", username="rag_user")
 
         results_dict = await self.search_knowledge_base(
@@ -311,7 +311,7 @@ class KnowledgeOrchestrationService:
             filters=filters,
         )
 
-        items = []
+        items: list[SearchResultItem] = []
         for r in results_dict:
             if isinstance(r, SearchResultItem):
                 items.append(r)
