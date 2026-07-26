@@ -81,6 +81,54 @@ class EmailVerificationRequested(BaseDomainEvent):
     verification_token: str = ""
 
 
+@dataclass(frozen=True)
+class DocumentUploaded(BaseDomainEvent):
+    """Event emitted when a new document is successfully uploaded."""
+
+    document_id: str = ""
+    owner_id: str = ""
+    original_filename: str = ""
+    file_size: int = 0
+    sha256_hash: str = ""
+
+
+@dataclass(frozen=True)
+class DocumentDeleted(BaseDomainEvent):
+    """Event emitted when a document is deleted."""
+
+    document_id: str = ""
+    deleted_by: str = ""
+    reason: str = "user_action"
+
+
+@dataclass(frozen=True)
+class DocumentVersionCreated(BaseDomainEvent):
+    """Event emitted when a new version of a document is created."""
+
+    document_id: str = ""
+    version_number: int = 1
+    uploaded_by: str = ""
+    checksum: str = ""
+
+
+@dataclass(frozen=True)
+class DocumentDownloadRequested(BaseDomainEvent):
+    """Event emitted when a document download is initiated."""
+
+    document_id: str = ""
+    requested_by: str = ""
+    ip_address: str | None = None
+
+
+@dataclass(frozen=True)
+class UploadFailed(BaseDomainEvent):
+    """Event emitted when a document upload transaction fails."""
+
+    upload_id: str = ""
+    user_id: str = ""
+    reason: str = ""
+
+
 EventType = TypeVar("EventType", bound=BaseDomainEvent)
 
 

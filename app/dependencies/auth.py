@@ -68,6 +68,10 @@ async def get_current_user(
     return user
 
 
+# Alias for compatibility
+get_current_active_user = get_current_user
+
+
 def require_role(*required_roles: str) -> Callable[..., UserModel]:
     """
     Dependency factory to enforce role-based access control (RBAC).

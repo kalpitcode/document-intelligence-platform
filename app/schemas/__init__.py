@@ -19,13 +19,27 @@ from app.schemas.auth import (
     VerifyEmailRequest,
 )
 from app.schemas.base import APIErrorResponse, APIResponse
+from app.schemas.document import (
+    DocumentDownloadResponse,
+    DocumentMetadataResponse,
+    DocumentResponse,
+    DocumentTagResponse,
+    DocumentUpdate,
+    DocumentVersionResponse,
+    UploadSessionResponse,
+)
 from app.schemas.user import PermissionResponse, RoleResponse, UpdateProfileRequest, UserResponse
 
 __all__ = [
     "APIErrorResponse",
     "APIResponse",
-    "BaseResponse",
     "ChangePasswordRequest",
+    "DocumentDownloadResponse",
+    "DocumentMetadataResponse",
+    "DocumentResponse",
+    "DocumentTagResponse",
+    "DocumentUpdate",
+    "DocumentVersionResponse",
     "ForgotPasswordRequest",
     "LoginRequest",
     "PermissionResponse",
@@ -36,6 +50,7 @@ __all__ = [
     "RoleResponse",
     "TokenResponse",
     "UpdateProfileRequest",
+    "UploadSessionResponse",
     "UserResponse",
     "VerifyEmailRequest",
 ]

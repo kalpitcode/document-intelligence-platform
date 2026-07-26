@@ -25,6 +25,9 @@ os.environ["POSTGRES_DB"] = "document_intelligence_test"
 
 from app.core.database.base import Base
 from app.core.database.session import get_async_session, get_db_session
+from app.models.user import UserModel
+from app.repositories.user_repository import UserRepository
+from app.services.password_service import PasswordService
 
 
 @pytest.fixture(scope="session")
@@ -64,6 +67,28 @@ async def db_session(async_test_engine) -> AsyncGenerator[AsyncSession, None]:
     session_factory = async_sessionmaker(bind=async_test_engine, expire_on_commit=False)
     async with session_factory() as session:
         yield session
+
+
+@pytest_asyncio.fixture
+async def test_user(db_session: AsyncSession) -> UserModel:
+    """Create and return a test user instance."""
+    user_repo = UserRepository(db_session)
+    existing = await user_repo.get_by_email("testuser@blackrock.com")
+    if existing:
+        return existing
+
+    user_data = {
+        "email": "testuser@blackrock.com",
+        "username": "testuser",
+        "hashed_password": PasswordService.hash_password("Password123!"),
+        "first_name": "Test",
+        "last_name": "User",
+        "is_active": True,
+        "email_verified": True,
+    }
+    user = await user_repo.create(**user_data)
+    await db_session.commit()
+    return user
 
 
 @pytest_asyncio.fixture()

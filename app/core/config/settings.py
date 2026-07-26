@@ -248,6 +248,54 @@ class Settings(BaseSettings):
     )
 
     # ==========================================================================
+    # MinIO / Object Storage Settings
+    # ==========================================================================
+    minio_endpoint: str = Field(
+        default="localhost:9000",
+        description="MinIO endpoint host and port",
+    )
+    minio_access_key: str = Field(
+        default="minioadmin",
+        description="MinIO access key",
+    )
+    minio_secret_key: str = Field(
+        default="minioadmin",
+        description="MinIO secret key",
+    )
+    minio_bucket_name: str = Field(
+        default="documents",
+        description="MinIO bucket name for document storage",
+    )
+    minio_use_ssl: bool = Field(
+        default=False,
+        description="Whether to use SSL for MinIO connection",
+    )
+
+    # ==========================================================================
+    # Document Storage & Validation Limits
+    # ==========================================================================
+    max_upload_size_bytes: int = Field(
+        default=104_857_600,  # 100 MB
+        description="Maximum file upload size in bytes (100MB)",
+    )
+    allowed_extensions: list[str] = Field(
+        default=[".pdf", ".docx", ".txt", ".csv", ".xlsx", ".png", ".jpg", ".jpeg"],
+        description="Allowed file extensions",
+    )
+    allowed_mime_types: list[str] = Field(
+        default=[
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/plain",
+            "text/csv",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "image/png",
+            "image/jpeg",
+        ],
+        description="Allowed MIME types",
+    )
+
+    # ==========================================================================
     # Validators
     # ==========================================================================
     @field_validator("app_env")
