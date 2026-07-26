@@ -134,3 +134,19 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
             yield ac
 
         app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def auth_headers(test_user: UserModel) -> dict[str, str]:
+    """Generate authorization headers with valid JWT token for test_user."""
+    from app.services.token_service import TokenService
+    token_version = getattr(test_user, "token_version", 1)
+    access_token = TokenService.create_access_token(
+        user_id=test_user.id,
+        username=test_user.username,
+        email=test_user.email,
+        token_version=token_version,
+        roles=["user"],
+        permissions=["read", "write"],
+    )
+    return {"Authorization": f"Bearer {access_token}"}

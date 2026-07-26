@@ -49,10 +49,18 @@ from app.repositories.knowledge_repository import (
     EmbeddingModelRepository,
     SearchHistoryRepository,
 )
+from app.repositories.rag_repository import (
+    ChatMessageRepository,
+    ChatSessionRepository,
+    LLMUsageLogRepository,
+    PromptTemplateRepository,
+)
 
 __all__ = [
     "AuditRepository",
     "BaseRepository",
+    "ChatMessageRepository",
+    "ChatSessionRepository",
     "DocumentChunkRepository",
     "DocumentContentRepository",
     "DocumentRepository",
@@ -60,9 +68,11 @@ __all__ = [
     "EmbeddingModelRepository",
     "ExtractedImageRepository",
     "ExtractedTableRepository",
+    "LLMUsageLogRepository",
     "MetadataRepository",
     "PermissionRepository",
     "ProcessingJobRepository",
+    "PromptTemplateRepository",
     "RefreshTokenRepository",
     "RoleRepository",
     "SearchHistoryRepository",

@@ -285,6 +285,60 @@ class KnowledgeOrchestrationService:
 
         return final_results
 
+    async def search(
+        self,
+        query: str,
+        user_id: uuid.UUID | str,
+        search_mode: str = "hybrid",
+        top_k: int = 10,
+        filters: dict[str, Any] | None = None,
+    ) -> SearchResponse:
+        """
+        Unified search endpoint for RAG ContextRetrievalService.
+        """
+        from app.schemas.knowledge import SearchResponse, SearchResultItem
+        start_time = time.time()
+        
+        # Build dummy or real user model for access check
+        u_id = uuid.UUID(str(user_id)) if isinstance(user_id, str) else user_id
+        current_user = UserModel(id=u_id, email="rag_user@blackrock.com", username="rag_user")
+
+        results_dict = await self.search_knowledge_base(
+            query=query,
+            current_user=current_user,
+            query_type=search_mode,
+            top_k=top_k,
+            filters=filters,
+        )
+
+        items = []
+        for r in results_dict:
+            if isinstance(r, SearchResultItem):
+                items.append(r)
+            elif isinstance(r, dict):
+                items.append(
+                    SearchResultItem(
+                        chunk_id=r.get("chunk_id", str(uuid.uuid4())),
+                        document_id=r.get("document_id", str(uuid.uuid4())),
+                        owner_id=r.get("owner_id"),
+                        score=float(r.get("score", 1.0)),
+                        page_number=int(r.get("page_number", 1)),
+                        chunk_index=int(r.get("chunk_index", 0)),
+                        snippet=r.get("text_snippet") or r.get("snippet") or r.get("text") or "",
+                        highlighted_text=r.get("highlighted_text") or r.get("text_snippet") or "",
+                        metadata=r.get("metadata") or {},
+                    )
+                )
+
+        latency_ms = int((time.time() - start_time) * 1000)
+        return SearchResponse(
+            query=query,
+            query_type=search_mode,
+            total_results=len(items),
+            latency_ms=latency_ms,
+            results=items,
+        )
+
     async def reindex_document(self, document_id: uuid.UUID | str) -> bool:
         """Purge old document vectors from Qdrant and re-compute embeddings."""
         if isinstance(document_id, str):

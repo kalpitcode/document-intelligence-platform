@@ -49,9 +49,17 @@ from app.models.knowledge import (
     EmbeddingModelModel,
     SearchHistoryModel,
 )
+from app.models.rag import (
+    ChatMessageModel,
+    ChatSessionModel,
+    LLMUsageLogModel,
+    PromptTemplateModel,
+)
 
 __all__ = [
     "AuditLogModel",
+    "ChatMessageModel",
+    "ChatSessionModel",
     "DocumentChunkModel",
     "DocumentContentModel",
     "DocumentMetadataModel",
@@ -65,9 +73,11 @@ __all__ = [
     "EmbeddingModelModel",
     "ExtractedImageModel",
     "ExtractedTableModel",
+    "LLMUsageLogModel",
     "PermissionModel",
     "ProcessingJobModel",
     "ProcessingStatus",
+    "PromptTemplateModel",
     "RefreshTokenModel",
     "RoleModel",
     "SearchHistoryModel",

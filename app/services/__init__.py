@@ -64,6 +64,11 @@ from app.services.knowledge_orchestration_service import KnowledgeOrchestrationS
 from app.services.reranking_service import RerankingService
 from app.services.vector_service import VectorService
 
+from app.services.context_retrieval_service import ContextRetrievalService
+from app.services.llm_service import LLMService
+from app.services.prompt_builder_service import PromptBuilderService
+from app.services.rag_service import RAGService
+
 __all__ = [
     "AuditService",
     "AuthService",
@@ -71,6 +76,7 @@ __all__ = [
     "ChecksumService",
     "ChunkingService",
     "ContentCleaningService",
+    "ContextRetrievalService",
     "DocumentProcessingService",
     "DocumentService",
     "EmailService",
@@ -79,10 +85,13 @@ __all__ = [
     "ImageExtractionService",
     "KnowledgeOrchestrationService",
     "LanguageDetectionService",
+    "LLMService",
     "MetadataService",
     "OCRService",
     "PasswordService",
     "PermissionService",
+    "PromptBuilderService",
+    "RAGService",
     "RerankingService",
     "RoleService",
     "StorageService",
