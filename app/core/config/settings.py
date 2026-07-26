@@ -296,6 +296,14 @@ class Settings(BaseSettings):
     )
 
     # ==========================================================================
+    # AI & Vector Embeddings
+    # ==========================================================================
+    embedding_batch_size: int = Field(
+        default=32,
+        description="Batch size for generating vector embeddings",
+    )
+
+    # ==========================================================================
     # Validators
     # ==========================================================================
     @field_validator("app_env")

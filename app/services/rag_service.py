@@ -113,12 +113,12 @@ class RAGService:
         6. Usage audit logging & conversation history persistence.
         """
         total_start_time = time.perf_counter()
-        u_id = uuid.UUID(str(user_id)) if isinstance(user_id, str) else user_id
+        u_id = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
 
         # 1. Manage Chat Session
         session: ChatSessionModel | None = None
         if session_id:
-            s_id = uuid.UUID(str(session_id)) if isinstance(session_id, str) else session_id
+            s_id = uuid.UUID(session_id) if isinstance(session_id, str) else session_id
             session = await self.session_repo.get_session_by_id_and_user(s_id, u_id)
 
         if not session:
@@ -200,7 +200,9 @@ class RAGService:
         # Touch session last_message_at timestamp
         await self.session_repo.touch_session(session)
 
-        # 7. Audit Log Usage
+        # 7. Audit Log Usage with Telemetry & Metadata
+        retrieved_chunk_ids = [c.chunk_id for c in context_envelope.chunks]
+        retrieval_scores = [c.score for c in context_envelope.chunks]
         await self.usage_log_repo.log_usage(
             user_id=u_id,
             model=llm_response.model_name,
@@ -209,6 +211,11 @@ class RAGService:
             total_tokens=llm_response.total_tokens,
             cost=llm_response.estimated_cost,
             latency_ms=total_latency_ms,
+            prompt_template_name=prompt_envelope.template_name,
+            prompt_version=prompt_envelope.template_version,
+            retrieved_chunk_ids=retrieved_chunk_ids,
+            retrieval_scores=retrieval_scores,
+            retrieval_strategy=search_mode,
         )
 
         # Commit session transaction

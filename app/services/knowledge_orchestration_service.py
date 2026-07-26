@@ -16,6 +16,7 @@ and domain event publishing.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import hashlib
 import logging
 import time
 from typing import Any, Sequence
@@ -150,8 +151,10 @@ class KnowledgeOrchestrationService:
             vectors = await self.embedding_service.generate_batch_embeddings(chunk_texts)
 
             # 3. Build Qdrant points
+            now_iso = datetime.now(UTC).isoformat()
             points = []
             for chunk, vec in zip(chunks, vectors):
+                c_hash = hashlib.sha256(chunk.content.encode("utf-8")).hexdigest()
                 points.append({
                     "id": str(chunk.id),
                     "vector": vec,
@@ -167,6 +170,11 @@ class KnowledgeOrchestrationService:
                         "mime_type": doc.mime_type if isinstance(doc.mime_type, str) else str(doc.mime_type),
                         "original_filename": doc.original_filename if isinstance(doc.original_filename, str) else str(doc.original_filename),
                         "language": getattr(doc.content_record, "language", "en") if getattr(doc, "content_record", None) else "en",
+                        "embedding_model": self.embedding_service.model_name,
+                        "embedding_version": "1.0.0",
+                        "embedding_created_at": now_iso,
+                        "document_version": getattr(doc, "current_version", 1) or 1,
+                        "chunk_hash": c_hash,
                     },
                 })
 

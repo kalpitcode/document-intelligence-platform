@@ -138,8 +138,13 @@ class LLMUsageLogRepository(BaseRepository[LLMUsageLogModel]):
         total_tokens: int,
         cost: float,
         latency_ms: int,
+        prompt_template_name: str | None = None,
+        prompt_version: str | None = None,
+        retrieved_chunk_ids: list[str] | None = None,
+        retrieval_scores: list[float] | None = None,
+        retrieval_strategy: str | None = None,
     ) -> LLMUsageLogModel:
-        """Create a new LLM usage audit log record."""
+        """Create a new LLM usage audit log record with telemetry metadata."""
         if isinstance(user_id, str):
             user_id = uuid.UUID(user_id)
 
@@ -151,4 +156,9 @@ class LLMUsageLogRepository(BaseRepository[LLMUsageLogModel]):
             total_tokens=total_tokens,
             cost=cost,
             latency_ms=latency_ms,
+            prompt_template_name=prompt_template_name,
+            prompt_version=prompt_version,
+            retrieved_chunk_ids=retrieved_chunk_ids,
+            retrieval_scores=retrieval_scores,
+            retrieval_strategy=retrieval_strategy,
         )

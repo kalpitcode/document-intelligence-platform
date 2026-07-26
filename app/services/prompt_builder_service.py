@@ -39,6 +39,8 @@ class FormattedPromptEnvelope:
     system_prompt: str
     user_prompt: str
     prompt_tokens: int
+    template_name: str = "default_rag"
+    template_version: str = "1.0.0"
 
 
 class PromptBuilderService:
@@ -115,8 +117,11 @@ class PromptBuilderService:
                 user_prompt = self.tokenizer.decode(user_prompt_tokens)
                 total_prompt_tokens = system_tokens + len(user_prompt_tokens)
 
+        template_name = "custom_prompt" if custom_system_prompt else "default_rag"
         return FormattedPromptEnvelope(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             prompt_tokens=total_prompt_tokens,
+            template_name=template_name,
+            template_version="1.0.0",
         )

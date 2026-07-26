@@ -244,6 +244,31 @@ class LLMUsageLogModel(Base):
         nullable=False,
         default=0,
     )
+    prompt_template_name: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+        default="default_rag",
+    )
+    prompt_version: Mapped[str | None] = mapped_column(
+        String(32),
+        nullable=True,
+        default="1.0.0",
+    )
+    retrieved_chunk_ids: Mapped[list[str] | None] = mapped_column(
+        JSONColumn,
+        nullable=True,
+        default=list,
+    )
+    retrieval_scores: Mapped[list[float] | None] = mapped_column(
+        JSONColumn,
+        nullable=True,
+        default=list,
+    )
+    retrieval_strategy: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        default="hybrid",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

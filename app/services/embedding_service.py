@@ -127,15 +127,27 @@ class EmbeddingService:
 
         return vector
 
-    async def generate_batch_embeddings(self, texts: list[str]) -> list[list[float]]:
-        """Batch generate embeddings for multiple text strings."""
+    async def generate_batch_embeddings(
+        self,
+        texts: list[str],
+        batch_size: int | None = None,
+    ) -> list[list[float]]:
+        """
+        Batch generate embeddings for multiple text strings using configurable batch size.
+        """
         if not texts:
             return []
 
-        embeddings = []
-        for text in texts:
-            vec = await self.generate_embedding(text)
-            embeddings.append(vec)
+        from app.core.config import get_settings
+        effective_batch_size = batch_size or get_settings().embedding_batch_size
+
+        embeddings: list[list[float]] = []
+        for i in range(0, len(texts), effective_batch_size):
+            batch_texts = texts[i : i + effective_batch_size]
+            for text in batch_texts:
+                vec = await self.generate_embedding(text)
+                embeddings.append(vec)
+
         return embeddings
 
     async def _compute_vector(self, text: str) -> list[float]:
