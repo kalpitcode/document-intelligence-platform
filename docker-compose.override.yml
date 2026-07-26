@@ -1,0 +1,37 @@
+# ==============================================================================
+# Docker Compose Override — Development Only
+# ==============================================================================
+# This file is automatically loaded by docker-compose and provides
+# development-specific overrides (hot reload, debug ports, etc.).
+#
+# For production, use: docker-compose -f docker-compose.yml up
+# ==============================================================================
+
+services:
+  app:
+    build:
+      target: production  # Still use full build but override CMD
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/app
+    environment:
+      - APP_ENV=development
+      - APP_DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - LOG_FORMAT=console
+      - POSTGRES_ECHO=true
+    volumes:
+      - ./app:/app/app  # Bind mount for hot reload (read-write)
+      - ./migrations:/app/migrations
+      - ./alembic.ini:/app/alembic.ini
+    ports:
+      - "8000:8000"
+
+  celery-worker:
+    command: >
+      celery -A app.workers.celery_app worker
+      --loglevel=debug
+      --concurrency=2
+    environment:
+      - APP_ENV=development
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ./app:/app/app
