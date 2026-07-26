@@ -28,21 +28,35 @@ from app.schemas.document import (
     DocumentVersionResponse,
     UploadSessionResponse,
 )
+from app.schemas.processing import (
+    DocumentChunkResponse,
+    DocumentContentResponse,
+    ExtractedImageResponse,
+    ExtractedTableResponse,
+    ProcessTriggerResponse,
+    ProcessingJobResponse,
+)
 from app.schemas.user import PermissionResponse, RoleResponse, UpdateProfileRequest, UserResponse
 
 __all__ = [
     "APIErrorResponse",
     "APIResponse",
     "ChangePasswordRequest",
+    "DocumentChunkResponse",
+    "DocumentContentResponse",
     "DocumentDownloadResponse",
     "DocumentMetadataResponse",
     "DocumentResponse",
     "DocumentTagResponse",
     "DocumentUpdate",
     "DocumentVersionResponse",
+    "ExtractedImageResponse",
+    "ExtractedTableResponse",
     "ForgotPasswordRequest",
     "LoginRequest",
     "PermissionResponse",
+    "ProcessTriggerResponse",
+    "ProcessingJobResponse",
     "RefreshTokenRequest",
     "RegisterRequest",
     "ResendVerificationRequest",

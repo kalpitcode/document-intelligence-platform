@@ -59,17 +59,26 @@ class MinIOStorageProvider(StorageProvider):
 
     def _initialize_client(self) -> None:
         """Initialize MinIO client and ensure target bucket exists."""
-        if not MINIO_AVAILABLE or Minio is None:
+        import os
+        settings = get_settings()
+        is_pytest = bool(os.environ.get("PYTEST_CURRENT_TEST"))
+        if not MINIO_AVAILABLE or Minio is None or getattr(settings, "app_env", "") in ("testing", "test") or is_pytest:
             self._is_online = False
-            logger.info("MinIO package not installed, using in-memory storage fallback")
+            logger.info("MinIO package unavailable or in testing mode, using in-memory storage fallback")
             return
 
         try:
+            import urllib3
+            http_client = urllib3.PoolManager(
+                timeout=urllib3.Timeout(connect=0.5, read=1.0),
+                retries=urllib3.Retry(total=0),
+            )
             self.client = Minio(
                 endpoint=self.endpoint,
                 access_key=self.access_key,
                 secret_key=self.secret_key,
                 secure=self.secure,
+                http_client=http_client,
             )
             if not self.client.bucket_exists(self.bucket_name):
                 self.client.make_bucket(self.bucket_name)
@@ -104,13 +113,19 @@ class MinIOStorageProvider(StorageProvider):
                 logger.error("MinIO upload failed, falling back to memory store: %s", str(exc))
 
         # Memory store fallback
-        _memory_storage_store[f"{self.bucket_name}/{object_name}"] = file_data
-        return f"{self.bucket_name}/{object_name}"
+        prefix = f"{self.bucket_name}/"
+        clean_key = object_name[len(prefix):] if object_name.startswith(prefix) else object_name
+        full_key = f"{self.bucket_name}/{clean_key}"
+        _memory_storage_store[full_key] = file_data
+        _memory_storage_store[clean_key] = file_data
+        _memory_storage_store[object_name] = file_data
+        return full_key
 
     async def download(self, object_name: str) -> bytes:
         """Download file content from MinIO or memory store."""
         full_key = object_name if object_name.startswith(f"{self.bucket_name}/") else f"{self.bucket_name}/{object_name}"
-        clean_key = object_name.replace(f"{self.bucket_name}/", "")
+        prefix = f"{self.bucket_name}/"
+        clean_key = object_name[len(prefix):] if object_name.startswith(prefix) else object_name
 
         if self._is_online and self.client:
             try:
@@ -126,12 +141,15 @@ class MinIOStorageProvider(StorageProvider):
             return _memory_storage_store[full_key]
         if clean_key in _memory_storage_store:
             return _memory_storage_store[clean_key]
+        if object_name in _memory_storage_store:
+            return _memory_storage_store[object_name]
         raise FileNotFoundError(f"Object {object_name} not found in storage")
 
     async def delete(self, object_name: str) -> bool:
         """Delete object from MinIO or memory store."""
         full_key = object_name if object_name.startswith(f"{self.bucket_name}/") else f"{self.bucket_name}/{object_name}"
-        clean_key = object_name.replace(f"{self.bucket_name}/", "")
+        prefix = f"{self.bucket_name}/"
+        clean_key = object_name[len(prefix):] if object_name.startswith(prefix) else object_name
 
         if self._is_online and self.client:
             try:
@@ -141,6 +159,7 @@ class MinIOStorageProvider(StorageProvider):
 
         _memory_storage_store.pop(full_key, None)
         _memory_storage_store.pop(clean_key, None)
+        _memory_storage_store.pop(object_name, None)
         return True
 
     async def copy(self, source_object: str, dest_object: str) -> bool:
@@ -158,7 +177,8 @@ class MinIOStorageProvider(StorageProvider):
     async def exists(self, object_name: str) -> bool:
         """Check if object exists."""
         full_key = object_name if object_name.startswith(f"{self.bucket_name}/") else f"{self.bucket_name}/{object_name}"
-        clean_key = object_name.replace(f"{self.bucket_name}/", "")
+        prefix = f"{self.bucket_name}/"
+        clean_key = object_name[len(prefix):] if object_name.startswith(prefix) else object_name
 
         if self._is_online and self.client:
             try:
@@ -169,7 +189,7 @@ class MinIOStorageProvider(StorageProvider):
             except Exception:
                 pass
 
-        return full_key in _memory_storage_store or clean_key in _memory_storage_store
+        return full_key in _memory_storage_store or clean_key in _memory_storage_store or object_name in _memory_storage_store
 
     async def generate_presigned_url(
         self,
@@ -177,7 +197,8 @@ class MinIOStorageProvider(StorageProvider):
         expires_in: int = 3600,
     ) -> str:
         """Generate presigned download URL."""
-        clean_key = object_name.replace(f"{self.bucket_name}/", "")
+        prefix = f"{self.bucket_name}/"
+        clean_key = object_name[len(prefix):] if object_name.startswith(prefix) else object_name
 
         if self._is_online and self.client:
             try:

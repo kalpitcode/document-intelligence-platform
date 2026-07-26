@@ -129,6 +129,68 @@ class UploadFailed(BaseDomainEvent):
     reason: str = ""
 
 
+# --- Processing Domain Events ---
+
+@dataclass(frozen=True)
+class DocumentProcessingStarted(BaseDomainEvent):
+    """Event emitted when document processing starts."""
+
+    document_id: str = ""
+    job_id: str = ""
+    worker_name: str = ""
+
+
+@dataclass(frozen=True)
+class DocumentProcessingCompleted(BaseDomainEvent):
+    """Event emitted when document processing completes successfully."""
+
+    document_id: str = ""
+    job_id: str = ""
+    word_count: int = 0
+    chunk_count: int = 0
+    table_count: int = 0
+    image_count: int = 0
+
+
+@dataclass(frozen=True)
+class DocumentProcessingFailed(BaseDomainEvent):
+    """Event emitted when document processing encounters an error."""
+
+    document_id: str = ""
+    job_id: str = ""
+    error_message: str = ""
+
+
+@dataclass(frozen=True)
+class DocumentChunkCreated(BaseDomainEvent):
+    """Event emitted when a document text chunk is generated."""
+
+    document_id: str = ""
+    chunk_id: str = ""
+    chunk_index: int = 0
+    token_estimate: int = 0
+
+
+@dataclass(frozen=True)
+class TableExtracted(BaseDomainEvent):
+    """Event emitted when a table is extracted from a document page."""
+
+    document_id: str = ""
+    table_id: str = ""
+    page_number: int = 1
+    row_count: int = 0
+
+
+@dataclass(frozen=True)
+class ImageExtracted(BaseDomainEvent):
+    """Event emitted when an embedded image is extracted from a document page."""
+
+    document_id: str = ""
+    image_id: str = ""
+    page_number: int = 1
+    storage_path: str = ""
+
+
 EventType = TypeVar("EventType", bound=BaseDomainEvent)
 
 

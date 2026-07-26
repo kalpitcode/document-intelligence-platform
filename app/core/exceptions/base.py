@@ -372,3 +372,24 @@ class ResourceForbiddenException(AuthorizationException):
             detail=detail or {},
         )
 
+
+class NotFoundError(EntityNotFoundException):
+    """Alias for EntityNotFoundException."""
+    def __init__(self, message: str = "Resource not found", detail: dict[str, Any] | None = None) -> None:
+        super().__init__(entity_type="Resource", detail=detail)
+        self.message = message
+        self.args = (message,)
+
+
+class ForbiddenError(ResourceForbiddenException):
+    """Alias for ResourceForbiddenException."""
+    def __init__(self, message: str = "Forbidden", detail: dict[str, Any] | None = None) -> None:
+        super().__init__(message=message, detail=detail)
+
+
+class ProcessingError(BaseAppException):
+    """Raised when document processing pipeline fails."""
+    def __init__(self, message: str = "Document processing failed", detail: dict[str, Any] | None = None) -> None:
+        super().__init__(message=message, error_code="PROCESSING_ERROR", status_code=500, detail=detail or {})
+
+

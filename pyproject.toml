@@ -48,6 +48,16 @@ aiofiles = "^24.1.0"
 python-magic = "^0.4.27"
 minio = "^7.2.10"
 
+# --- Document Processing & OCR ---
+pymupdf = "^1.25.1"
+pdfplumber = "^0.11.4"
+pytesseract = "^0.3.13"
+pillow = "^11.0.0"
+python-docx = "^1.1.2"
+unstructured = "^0.16.11"
+langdetect = "^1.0.9"
+beautifulsoup4 = "^4.12.3"
+
 # --- Observability ---
 structlog = "^24.4.0"
 

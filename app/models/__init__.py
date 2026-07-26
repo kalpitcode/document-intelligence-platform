@@ -12,6 +12,7 @@ Exported models:
 - UserSessionModel
 - AuditLogModel
 - DocumentModel, DocumentVersionModel, DocumentMetadataModel, UploadSessionModel, DocumentTagModel, DocumentPermissionModel, document_tags, DocumentStatus, Visibility
+- DocumentContentModel, DocumentChunkModel, ProcessingJobModel, ExtractedTableModel, ExtractedImageModel, ProcessingStatus
 """
 
 from __future__ import annotations
@@ -29,6 +30,14 @@ from app.models.document import (
     document_tags,
 )
 from app.models.permission import PermissionModel
+from app.models.processing import (
+    DocumentChunkModel,
+    DocumentContentModel,
+    ExtractedImageModel,
+    ExtractedTableModel,
+    ProcessingJobModel,
+    ProcessingStatus,
+)
 from app.models.role import RoleModel, role_permissions
 from app.models.session import UserSessionModel
 from app.models.token import RefreshTokenModel
@@ -36,13 +45,19 @@ from app.models.user import UserModel, user_roles
 
 __all__ = [
     "AuditLogModel",
+    "DocumentChunkModel",
+    "DocumentContentModel",
     "DocumentMetadataModel",
     "DocumentModel",
     "DocumentPermissionModel",
     "DocumentStatus",
     "DocumentTagModel",
     "DocumentVersionModel",
+    "ExtractedImageModel",
+    "ExtractedTableModel",
     "PermissionModel",
+    "ProcessingJobModel",
+    "ProcessingStatus",
     "RefreshTokenModel",
     "RoleModel",
     "UploadSessionModel",
