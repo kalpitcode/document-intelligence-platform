@@ -23,7 +23,7 @@ import logging
 from typing import Any
 
 import aio_pika
-from aio_pika import Channel, RobustConnection
+from aio_pika import Channel
 from aio_pika.abc import AbstractRobustConnection
 
 from app.core.config import get_settings

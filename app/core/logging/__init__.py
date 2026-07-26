@@ -31,8 +31,8 @@ from app.core.logging.context import (
 )
 
 __all__ = [
-    "get_logger",
     "get_correlation_id",
+    "get_logger",
     "get_request_id",
     "set_correlation_id",
     "set_request_id",

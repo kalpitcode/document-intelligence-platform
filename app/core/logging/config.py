@@ -22,12 +22,8 @@ from __future__ import annotations
 import logging
 import os
 from logging.handlers import RotatingFileHandler
-from typing import TYPE_CHECKING
 
 from app.core.logging.formatters import DevelopmentFormatter, JSONFormatter
-
-if TYPE_CHECKING:
-    pass
 
 
 def setup_logging(

@@ -2,15 +2,34 @@
 Repositories Package
 =====================
 
-Data access layer implementing the Repository Pattern.
+Data access repositories for the Document Intelligence Platform.
 
-No repositories are defined yet — this package provides the
-registration point for future repository modules.
-
-All repositories should:
-- Accept an `AsyncSession` via dependency injection.
-- Contain ONLY data access logic (no business rules).
-- Return domain entities or raise domain exceptions.
+Exported repositories:
+- BaseRepository
+- UserRepository
+- RoleRepository
+- PermissionRepository
+- RefreshTokenRepository
+- SessionRepository
+- AuditRepository
 """
 
 from __future__ import annotations
+
+from app.repositories.audit_repository import AuditRepository
+from app.repositories.base import BaseRepository
+from app.repositories.permission_repository import PermissionRepository
+from app.repositories.role_repository import RoleRepository
+from app.repositories.session_repository import SessionRepository
+from app.repositories.token_repository import RefreshTokenRepository
+from app.repositories.user_repository import UserRepository
+
+__all__ = [
+    "AuditRepository",
+    "BaseRepository",
+    "PermissionRepository",
+    "RefreshTokenRepository",
+    "RoleRepository",
+    "SessionRepository",
+    "UserRepository",
+]

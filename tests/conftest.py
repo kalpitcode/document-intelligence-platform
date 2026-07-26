@@ -3,19 +3,6 @@ Test Configuration & Fixtures
 ================================
 
 Central pytest configuration providing shared fixtures for all tests.
-
-**Architectural Rationale:**
-- The `test_app` fixture creates a fresh FastAPI application for each
-  test session, ensuring test isolation.
-- The `client` fixture provides an async HTTP client (httpx) that
-  sends requests to the test app without starting a real server.
-- Settings are overridden to use test-specific configuration
-  (separate database, reduced pool sizes, etc.).
-- Database fixtures provide isolated sessions with automatic rollback.
-
-**Connection to the system:**
-- All test modules automatically use fixtures defined here.
-- Uses `TestingSettings` for environment isolation.
 """
 
 from __future__ import annotations
@@ -29,20 +16,20 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 # Set test environment BEFORE importing app modules
 os.environ["APP_ENV"] = "testing"
 os.environ["POSTGRES_DB"] = "document_intelligence_test"
 
+from app.core.database.base import Base
+from app.core.database.session import get_async_session, get_db_session
+
 
 @pytest.fixture(scope="session")
 def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
-    """
-    Create a single event loop for the entire test session.
-
-    This prevents issues with multiple event loops when running
-    async tests.
-    """
+    """Create a single event loop for the entire test session."""
     loop = asyncio.new_event_loop()
     yield loop
     loop.close()
@@ -50,85 +37,69 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 
 @pytest.fixture(scope="session")
 def test_settings() -> Any:
-    """
-    Get test-specific settings.
-
-    Returns the TestingSettings configuration instance.
-    """
+    """Get test-specific settings."""
     from app.core.config import get_settings
 
-    # Clear lru_cache to force reload with test env
     get_settings.cache_clear()
-    settings = get_settings()
-    return settings
+    return get_settings()
 
 
-@pytest.fixture()
-def mock_db_health() -> AsyncMock:
-    """Mock database health check for tests without a real database."""
-    mock = AsyncMock(return_value={"status": "healthy"})
-    return mock
+@pytest_asyncio.fixture(scope="session")
+async def async_test_engine():
+    """Create in-memory SQLite engine for tests."""
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield engine
+    await engine.dispose()
 
 
-@pytest.fixture()
-def mock_redis_health() -> AsyncMock:
-    """Mock Redis health check for tests without a real Redis instance."""
-    mock = AsyncMock(return_value={"status": "healthy"})
-    return mock
-
-
-@pytest.fixture()
-def mock_rabbitmq_health() -> AsyncMock:
-    """Mock RabbitMQ health check for tests without a real RabbitMQ instance."""
-    mock = AsyncMock(return_value={"status": "healthy"})
-    return mock
+@pytest_asyncio.fixture
+async def db_session(async_test_engine) -> AsyncGenerator[AsyncSession, None]:
+    """Provide isolated AsyncSession for testing."""
+    session_factory = async_sessionmaker(bind=async_test_engine, expire_on_commit=False)
+    async with session_factory() as session:
+        yield session
 
 
 @pytest_asyncio.fixture()
-async def client() -> AsyncGenerator[AsyncClient, None]:
+async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """
-    Provide an async HTTP client for testing API endpoints.
-
-    Mocks all infrastructure connections (DB, Redis, RabbitMQ)
-    so tests can run without external dependencies.
+    Provide an async HTTP client for testing API endpoints with in-memory DB session override.
     """
-    # Mock infrastructure to avoid requiring real services
     with (
         patch("app.core.database.session.init_db", new_callable=AsyncMock),
         patch("app.core.database.session.close_db", new_callable=AsyncMock),
         patch("app.core.cache.redis.RedisManager.init", new_callable=AsyncMock),
         patch("app.core.cache.redis.RedisManager.close", new_callable=AsyncMock),
-        patch(
-            "app.core.cache.redis.RedisManager.health_check",
-            new_callable=AsyncMock,
-            return_value={"status": "healthy"},
-        ),
+        patch("app.core.cache.redis.RedisManager.health_check", AsyncMock(return_value={"status": "healthy"})),
         patch("app.core.messaging.rabbitmq.RabbitMQManager.init", new_callable=AsyncMock),
         patch("app.core.messaging.rabbitmq.RabbitMQManager.close", new_callable=AsyncMock),
-        patch(
-            "app.core.messaging.rabbitmq.RabbitMQManager.health_check",
-            new_callable=AsyncMock,
-            return_value={"status": "healthy"},
-        ),
-        patch(
-            "app.core.database.session.check_db_health",
-            new_callable=AsyncMock,
-            return_value={"status": "healthy"},
-        ),
-        patch(
-            "app.api.v1.endpoints.health.check_db_health",
-            new_callable=AsyncMock,
-            return_value={"status": "healthy"},
-        ),
+        patch("app.core.messaging.rabbitmq.RabbitMQManager.health_check", AsyncMock(return_value={"status": "healthy"})),
+        patch("app.core.database.check_db_health", AsyncMock(return_value={"status": "healthy"})),
+        patch("app.api.v1.endpoints.health.check_db_health", AsyncMock(return_value={"status": "healthy"})),
     ):
-        # Clear settings cache to ensure test settings are loaded
         from app.core.config import get_settings
-
         get_settings.cache_clear()
 
         from app.main import create_application
 
         app = create_application()
+
+        async def _override_get_db() -> AsyncGenerator[AsyncSession, None]:
+            try:
+                yield db_session
+                await db_session.commit()
+            except Exception:
+                await db_session.rollback()
+                raise
+
+        app.dependency_overrides[get_db_session] = _override_get_db
+        app.dependency_overrides[get_async_session] = _override_get_db
 
         transport = ASGITransport(app=app)
         async with AsyncClient(
@@ -136,3 +107,5 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
             base_url="http://testserver",
         ) as ac:
             yield ac
+
+        app.dependency_overrides.clear()

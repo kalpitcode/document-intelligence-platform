@@ -34,6 +34,12 @@ celery = { version = "^5.4.0", extras = ["redis"] }
 # --- HTTP ---
 httpx = "^0.28.0"
 
+# --- Security & Auth ---
+argon2-cffi = "^23.1.0"
+pyjwt = { version = "^2.10.0", extras = ["crypto"] }
+email-validator = "^2.1.0"
+aiosqlite = "^0.20.0"
+
 # --- Utilities ---
 python-dotenv = "^1.0.1"
 orjson = "^3.10.0"

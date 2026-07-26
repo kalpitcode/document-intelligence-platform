@@ -231,12 +231,78 @@ class AuthenticationException(BaseAppException):
     def __init__(
         self,
         message: str = "Authentication required",
+        error_code: str = "AUTHENTICATION_ERROR",
+        status_code: int = 401,
         detail: dict[str, Any] | None = None,
     ) -> None:
         super().__init__(
             message=message,
-            error_code="AUTHENTICATION_ERROR",
+            error_code=error_code,
+            status_code=status_code,
+            detail=detail or {},
+        )
+
+
+class InvalidCredentialsException(AuthenticationException):
+    """Raised when email or password is incorrect."""
+
+    def __init__(
+        self,
+        message: str = "Invalid email or password",
+        detail: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            error_code="AUTH_INVALID_CREDENTIALS",
             status_code=401,
+            detail=detail or {},
+        )
+
+
+class AccountLockedException(AuthenticationException):
+    """Raised when account is temporarily locked out."""
+
+    def __init__(
+        self,
+        message: str = "Account is temporarily locked due to repeated failed login attempts",
+        detail: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            error_code="AUTH_ACCOUNT_LOCKED",
+            status_code=423,
+            detail=detail or {},
+        )
+
+
+class TokenExpiredException(AuthenticationException):
+    """Raised when access or refresh token has expired."""
+
+    def __init__(
+        self,
+        message: str = "Token has expired",
+        detail: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            error_code="AUTH_TOKEN_EXPIRED",
+            status_code=401,
+            detail=detail or {},
+        )
+
+
+class EmailNotVerifiedException(AuthenticationException):
+    """Raised when unverified user attempts actions requiring verified email."""
+
+    def __init__(
+        self,
+        message: str = "Email address has not been verified",
+        detail: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            error_code="AUTH_EMAIL_NOT_VERIFIED",
+            status_code=403,
             detail=detail or {},
         )
 
@@ -247,11 +313,62 @@ class AuthorizationException(BaseAppException):
     def __init__(
         self,
         message: str = "Insufficient permissions",
+        error_code: str = "AUTHORIZATION_ERROR",
+        status_code: int = 403,
         detail: dict[str, Any] | None = None,
     ) -> None:
         super().__init__(
             message=message,
-            error_code="AUTHORIZATION_ERROR",
+            error_code=error_code,
+            status_code=status_code,
+            detail=detail or {},
+        )
+
+
+class PermissionDeniedException(AuthorizationException):
+    """Raised when required permission is missing."""
+
+    def __init__(
+        self,
+        message: str = "Required permission is missing",
+        detail: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            error_code="AUTH_PERMISSION_DENIED",
             status_code=403,
             detail=detail or {},
         )
+
+
+class RoleRequiredException(AuthorizationException):
+    """Raised when required role is missing."""
+
+    def __init__(
+        self,
+        message: str = "Required role is missing",
+        detail: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            error_code="AUTH_ROLE_REQUIRED",
+            status_code=403,
+            detail=detail or {},
+        )
+
+
+class ResourceForbiddenException(AuthorizationException):
+    """Raised when ownership/resource access rule fails."""
+
+    def __init__(
+        self,
+        message: str = "You do not have permission to access or modify this resource",
+        detail: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            error_code="AUTH_RESOURCE_FORBIDDEN",
+            status_code=403,
+            detail=detail or {},
+        )
+

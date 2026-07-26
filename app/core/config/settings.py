@@ -18,8 +18,6 @@ Central configuration for the entire application using Pydantic V2 BaseSettings.
 
 from __future__ import annotations
 
-from typing import Any
-
 from pydantic import Field, computed_field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -203,6 +201,50 @@ class Settings(BaseSettings):
     # ==========================================================================
     trusted_hosts: list[str] = Field(
         default=["localhost", "127.0.0.1"],
+    )
+
+    # ==========================================================================
+    # JWT & Authentication
+    # ==========================================================================
+    jwt_secret_key: str = Field(
+        default="SUPER_SECRET_JWT_KEY_PLEASE_CHANGE_IN_PRODUCTION_BLACKROCK_ALADDIN",
+        description="Secret key for signing JWT tokens",
+    )
+    jwt_algorithm: str = Field(
+        default="HS256",
+        description="Cryptographic algorithm for JWT signing",
+    )
+    jwt_access_token_expire_minutes: int = Field(
+        default=30,
+        description="Access token expiration time in minutes",
+    )
+    jwt_refresh_token_expire_days: int = Field(
+        default=7,
+        description="Refresh token expiration time in days",
+    )
+    jwt_issuer: str = Field(
+        default="blackrock-dip",
+        description="JWT issuer claim (iss)",
+    )
+    jwt_audience: str = Field(
+        default="blackrock-dip-api",
+        description="JWT audience claim (aud)",
+    )
+
+    # ==========================================================================
+    # Password & Account Security
+    # ==========================================================================
+    max_failed_login_attempts: int = Field(
+        default=5,
+        description="Maximum failed login attempts before account lockout",
+    )
+    account_lockout_minutes: int = Field(
+        default=15,
+        description="Lockout duration in minutes after maximum failed login attempts",
+    )
+    password_min_length: int = Field(
+        default=12,
+        description="Minimum password length requirement",
     )
 
     # ==========================================================================

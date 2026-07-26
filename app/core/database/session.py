@@ -132,8 +132,11 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         except Exception:
             await session.rollback()
             raise
-        finally:
             await session.close()
+
+
+# Alias for dependency injection compatibility
+get_async_session = get_db_session
 
 
 async def check_db_health() -> dict[str, Any]:
