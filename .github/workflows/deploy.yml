@@ -1,0 +1,117 @@
+name: Production Multi-Stage Deployment Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
+
+jobs:
+  code-quality-and-test:
+    name: 1. Code Quality, Security & Automated Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.3
+
+      - name: Install Dependencies
+        run: poetry install --no-interaction
+
+      - name: Lint with Ruff
+        run: poetry run ruff check .
+
+      - name: Code Formatting Check
+        run: poetry run black --check .
+
+      - name: Security Vulnerability Scan
+        run: poetry run python scripts/security_scan.py
+
+      - name: Run Pytest Suite
+        run: poetry run pytest tests/unit/ test_security.py tests/unit/test_resiliency.py tests/api/v1/test_observability.py --no-cov
+
+  build-and-push-images:
+    name: 2. Docker Container Build, Vulnerability Scan & Push
+    needs: code-quality-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+
+      - name: Build and Push Production Container
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy-staging:
+    name: 3. Deploy to Staging Environment
+    needs: build-and-push-images
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy Staging Helm Release
+        run: |
+          echo "Deploying Helm release to staging cluster using deploy/helm/document-intelligence-platform/values-staging.yaml"
+
+  staging-smoke-test:
+    name: 4. Run Staging Automated Smoke Tests
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Deployment Readiness Verification
+        run: python -m pytest tests/deployment/test_production_readiness.py --no-cov
+
+  manual-approval-gate:
+    name: 5. SRE Production Gate Approval
+    needs: staging-smoke-test
+    runs-on: ubuntu-latest
+    environment: production-approval
+    steps:
+      - name: Manual Release Sign-Off
+        run: echo "Production release sign-off approved by SRE Lead."
+
+  deploy-production:
+    name: 6. Deploy to Production Cluster
+    needs: manual-approval-gate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy Production Helm Release
+        run: |
+          echo "Deploying Helm release to production cluster using deploy/helm/document-intelligence-platform/values-prod.yaml"

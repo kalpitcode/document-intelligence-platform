@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dip-db-backup-cronjob
+  namespace: dip-production
+  labels:
+    app.kubernetes.io/name: document-intelligence-platform
+    app.kubernetes.io/component: backup
+spec:
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: document-intelligence-platform
+            app.kubernetes.io/component: backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: db-backup
+              image: python:3.12-slim
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  python scripts/db_backup.py
+              envFrom:
+                - secretRef:
+                    name: dip-secrets
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /app/tmp/backups
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: dip-storage-pvc

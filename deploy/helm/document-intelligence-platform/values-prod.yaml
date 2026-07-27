@@ -1,0 +1,41 @@
+replicaCount: 5
+
+image:
+  repository: ghcr.io/kalpitcode/document-intelligence-platform
+  tag: "stable"
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 5
+  maxReplicas: 25
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 75
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: dip.blackrock.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+env:
+  APP_ENV: "production"
+  LOG_LEVEL: "INFO"
+  PROMETHEUS_ENABLED: "true"
+  OPENTELEMETRY_ENABLED: "true"
+  RATE_LIMITING_ENABLED: "true"

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dip-qdrant
+  namespace: dip-production
+  labels:
+    app.kubernetes.io/name: document-intelligence-platform
+    app.kubernetes.io/component: vector-database
+spec:
+  serviceName: dip-qdrant-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: document-intelligence-platform
+      app.kubernetes.io/component: vector-database
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: document-intelligence-platform
+        app.kubernetes.io/component: vector-database
+    spec:
+      containers:
+        - name: qdrant
+          image: qdrant/qdrant:v1.9.2
+          ports:
+            - containerPort: 6333
+              name: http
+            - containerPort: 6334
+              name: grpc
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "1Gi"
+            limits:
+              cpu: "4000m"
+              memory: "8Gi"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 6333
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: qdrant-storage
+              mountPath: /qdrant/storage
+  volumeClaimTemplates:
+    - metadata:
+        name: qdrant-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dip-qdrant-service
+  namespace: dip-production
+spec:
+  ports:
+    - port: 6333
+      name: http
+    - port: 6334
+      name: grpc
+  selector:
+    app.kubernetes.io/name: document-intelligence-platform
+    app.kubernetes.io/component: vector-database

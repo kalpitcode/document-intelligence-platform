@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: dip-production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.0.0
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "admin_production_blackrock"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+  namespace: dip-production
+spec:
+  ports:
+    - port: 3000
+      name: http
+  selector:
+    app: grafana

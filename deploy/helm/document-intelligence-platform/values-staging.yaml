@@ -1,0 +1,26 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/kalpitcode/document-intelligence-platform
+  tag: "staging"
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+env:
+  APP_ENV: "staging"
+  LOG_LEVEL: "INFO"
+  PROMETHEUS_ENABLED: "true"
+  RATE_LIMITING_ENABLED: "true"

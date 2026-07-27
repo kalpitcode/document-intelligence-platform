@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dip-postgres
+  namespace: dip-production
+  labels:
+    app.kubernetes.io/name: document-intelligence-platform
+    app.kubernetes.io/component: database
+spec:
+  serviceName: dip-postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: document-intelligence-platform
+      app.kubernetes.io/component: database
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: document-intelligence-platform
+        app.kubernetes.io/component: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          envFrom:
+            - secretRef:
+                name: dip-secrets
+          env:
+            - name: POSTGRES_DB
+              value: "document_intelligence"
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "1Gi"
+            limits:
+              cpu: "4000m"
+              memory: "4Gi"
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "dip_prod_user"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "dip_prod_user"]
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dip-postgres-service
+  namespace: dip-production
+spec:
+  ports:
+    - port: 5432
+      name: postgres
+  selector:
+    app.kubernetes.io/name: document-intelligence-platform
+    app.kubernetes.io/component: database
+  clusterIP: None

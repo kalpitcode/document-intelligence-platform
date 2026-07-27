@@ -1,0 +1,23 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/kalpitcode/document-intelligence-platform
+  tag: "dev"
+  pullPolicy: Always
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+
+env:
+  APP_ENV: "development"
+  LOG_LEVEL: "DEBUG"
+  PROMETHEUS_ENABLED: "true"
+  RATE_LIMITING_ENABLED: "false"

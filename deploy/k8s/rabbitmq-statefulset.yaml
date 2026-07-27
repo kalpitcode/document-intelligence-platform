@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dip-rabbitmq
+  namespace: dip-production
+  labels:
+    app.kubernetes.io/name: document-intelligence-platform
+    app.kubernetes.io/component: message-broker
+spec:
+  serviceName: dip-rabbitmq-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: document-intelligence-platform
+      app.kubernetes.io/component: message-broker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: document-intelligence-platform
+        app.kubernetes.io/component: message-broker
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3.13-management-alpine
+          ports:
+            - containerPort: 5672
+              name: amqp
+            - containerPort: 15672
+              name: management
+          envFrom:
+            - secretRef:
+                name: dip-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+          readinessProbe:
+            exec:
+              command: ["rabbitmq-diagnostics", "-q", "ping"]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          volumeMounts:
+            - name: rabbitmq-storage
+              mountPath: /var/lib/rabbitmq
+  volumeClaimTemplates:
+    - metadata:
+        name: rabbitmq-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dip-rabbitmq-service
+  namespace: dip-production
+spec:
+  ports:
+    - port: 5672
+      name: amqp
+    - port: 15672
+      name: management
+  selector:
+    app.kubernetes.io/name: document-intelligence-platform
+    app.kubernetes.io/component: message-broker
