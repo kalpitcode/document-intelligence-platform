@@ -7,23 +7,8 @@ Registers all middleware on the FastAPI application in the correct order.
 **Architectural Rationale:**
 - Middleware order matters — the first registered middleware is the
   outermost wrapper (executed first on request, last on response).
-- This module centralizes registration so the order is explicit and
-  reviewable in one place.
-- CORS, Trusted Hosts, and GZip are Starlette built-ins.
-- Custom middleware (Request ID, Logging, Timing) implement our
-  cross-cutting concerns.
-
-**Middleware Execution Order (request flow):**
-1. Trusted Hosts → reject requests from untrusted hosts
-2. CORS → add CORS headers
-3. GZip → compress responses
-4. Request ID → assign unique ID
-5. Processing Time → start timer
-6. Logging → log request details
-7. Route Handler → business logic
-
-**Connection to the system:**
-- Called once by `app.main.create_application()` during startup.
+- Registers Security Headers, Rate Limiting, Request Size Limiting, Request ID,
+  Processing Time, Logging, CORS, and GZip.
 """
 
 from __future__ import annotations
@@ -35,20 +20,15 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.core.config import get_settings
 from app.middlewares.logging import LoggingMiddleware
+from app.middlewares.rate_limit import RateLimitMiddleware
 from app.middlewares.request_id import RequestIDMiddleware
+from app.middlewares.security import SecurityHeadersMiddleware
+from app.middlewares.size_limit import RequestSizeLimitMiddleware
 from app.middlewares.timing import ProcessingTimeMiddleware
 
 
 def register_middleware(app: FastAPI) -> None:
-    """
-    Register all middleware on the FastAPI application.
-
-    Middleware is registered in reverse execution order — the last
-    registered middleware is the outermost wrapper (executed first).
-
-    Args:
-        app: The FastAPI application instance.
-    """
+    """Register all middleware on the FastAPI application."""
     settings = get_settings()
 
     # --- Logging (innermost custom middleware → runs closest to the handler) ---
@@ -56,6 +36,15 @@ def register_middleware(app: FastAPI) -> None:
 
     # --- Processing Time ---
     app.add_middleware(ProcessingTimeMiddleware)
+
+    # --- Request Size Limiting (50MB cap) ---
+    app.add_middleware(RequestSizeLimitMiddleware)
+
+    # --- Rate Limiting (100 req/min default) ---
+    app.add_middleware(RateLimitMiddleware)
+
+    # --- Security Headers (HSTS, CSP, X-Frame-Options) ---
+    app.add_middleware(SecurityHeadersMiddleware)
 
     # --- Request ID (must be before logging so request_id is available) ---
     app.add_middleware(RequestIDMiddleware)

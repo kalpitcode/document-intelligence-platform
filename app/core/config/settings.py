@@ -304,6 +304,84 @@ class Settings(BaseSettings):
     )
 
     # ==========================================================================
+    # Observability, Metrics & Tracing (Milestone 9)
+    # ==========================================================================
+    prometheus_enabled: bool = Field(
+        default=True,
+        description="Enable Prometheus metrics gathering and export",
+    )
+    metrics_prefix: str = Field(
+        default="blackrock_dip",
+        description="Prefix for all Prometheus metric names",
+    )
+    opentelemetry_enabled: bool = Field(
+        default=True,
+        description="Enable OpenTelemetry distributed tracing context",
+    )
+    otel_service_name: str = Field(
+        default="document-intelligence-platform",
+        description="Service name reported in OpenTelemetry traces",
+    )
+    otel_exporter_endpoint: str | None = Field(
+        default=None,
+        description="Optional OTLP HTTP trace collector endpoint",
+    )
+
+    # ==========================================================================
+    # Rate Limiting & Security (Milestone 9)
+    # ==========================================================================
+    rate_limiting_enabled: bool = Field(
+        default=True,
+        description="Enable API request rate limiting",
+    )
+    rate_limit_default_requests: int = Field(
+        default=100,
+        description="Maximum requests per window per IP/User",
+    )
+    rate_limit_window_seconds: int = Field(
+        default=60,
+        description="Rate limiting sliding window duration in seconds",
+    )
+    max_request_size_bytes: int = Field(
+        default=52_428_800,  # 50 MB
+        description="Maximum allowed HTTP request payload size in bytes (50MB)",
+    )
+    enable_security_headers: bool = Field(
+        default=True,
+        description="Inject enterprise security HTTP headers (HSTS, CSP, etc.)",
+    )
+
+    # ==========================================================================
+    # Resiliency & Circuit Breaker (Milestone 9)
+    # ==========================================================================
+    circuit_breaker_enabled: bool = Field(
+        default=True,
+        description="Enable circuit breaker protection for downstream services",
+    )
+    cb_failure_threshold: int = Field(
+        default=5,
+        description="Consecutive failures before opening a circuit breaker",
+    )
+    cb_recovery_timeout_sec: float = Field(
+        default=30.0,
+        description="Duration in seconds before trying half-open state",
+    )
+
+    # ==========================================================================
+    # Feature Flags (Milestone 9)
+    # ==========================================================================
+    feature_flags: dict[str, bool] = Field(
+        default_factory=lambda: {
+            "enable_circuit_breaker": True,
+            "enable_audit_telemetry": True,
+            "enable_rate_limiting": True,
+            "enable_background_diagnostics": True,
+            "enable_detailed_health_checks": True,
+        },
+        description="Dynamic platform feature toggle flags",
+    )
+
+    # ==========================================================================
     # Validators
     # ==========================================================================
     @field_validator("app_env")
