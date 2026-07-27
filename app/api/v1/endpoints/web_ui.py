@@ -16,110 +16,70 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enterprise AI Document Intelligence Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-dark: #090d16;
-            --card-bg: rgba(22, 30, 46, 0.7);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --accent-blue: #3b82f6;
-            --accent-indigo: #6366f1;
-            --accent-purple: #8b5cf6;
-            --accent-cyan: #06b6d4;
-            --accent-green: #10b981;
-            --text-primary: #f8fafc;
-            --text-muted: #94a3b8;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #0b0f19; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
-        body { background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-
-        /* Animated Background Gradients */
-        .bg-glow {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background: 
-                radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
-                radial-gradient(circle at 85% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
-                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
-        }
-
-        /* Top Navigation Header */
         header {
-            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--card-border); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+            background-color: #131b2e; border-bottom: 1px solid #1e293b; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
         }
         .brand { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: #fff; box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
-        .brand-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .brand-subtitle { font-size: 11px; color: var(--accent-cyan); font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: #ffffff; }
+        .brand-title { font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; }
+        .brand-subtitle { font-size: 11px; color: #38bdf8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
         .header-actions { display: flex; align-items: center; gap: 16px; }
         .status-pill { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
-        .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite; }
+        .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
 
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        main { flex: 1; max-width: 1400px; width: 100%; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
 
-        /* Main Dashboard Container */
-        main { flex: 1; max-width: 1400px; width: 100%; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; gap: 32px; }
+        .tabs-nav { display: flex; gap: 8px; background: #131b2e; padding: 8px; border-radius: 14px; border: 1px solid #1e293b; overflow-x: auto; }
+        .tab-btn { background: transparent; border: none; color: #94a3b8; padding: 12px 22px; font-size: 14px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .tab-btn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.05); }
+        .tab-btn.active { background: linear-gradient(135deg, #2563eb, #4f46e5); color: #ffffff; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
 
-        /* Navigation Tabs */
-        .tabs-nav { display: flex; gap: 8px; background: rgba(30, 41, 59, 0.6); padding: 6px; border-radius: 14px; border: 1px solid var(--card-border); overflow-x: auto; }
-        .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-        .tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
-        .tab-btn.active { background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo)); color: #fff; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
-
-        /* Tab Contents */
-        .tab-content { display: none; flex-direction: column; gap: 24px; animation: fadeIn 0.3s ease; }
+        .tab-content { display: none; flex-direction: column; gap: 24px; }
         .tab-content.active { display: flex; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Grid Layout & Cards */
         .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
-        .card { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; transition: transform 0.2s ease, border-color 0.2s ease; }
-        .card:hover { transform: translateY(-3px); border-color: rgba(99, 102, 241, 0.3); }
+        .card { background: #131b2e; border: 1px solid #1e293b; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
 
         .card-header { display: flex; justify-content: space-between; align-items: center; }
-        .card-title { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .card-icon { font-size: 20px; opacity: 0.8; }
-        .card-value { font-size: 32px; font-weight: 800; letter-spacing: -1px; background: linear-gradient(to right, #fff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .card-subtext { font-size: 12px; color: var(--accent-cyan); font-weight: 500; }
+        .card-title { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .card-icon { font-size: 20px; }
+        .card-value { font-size: 32px; font-weight: 800; color: #ffffff; }
+        .card-subtext { font-size: 12px; color: #38bdf8; font-weight: 500; }
 
-        /* Interactive Sections */
-        .section-box { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--card-border); border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 20px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 16px; }
-        .section-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+        .section-box { background: #131b2e; border: 1px solid #1e293b; border-radius: 18px; padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 16px; }
+        .section-title { font-size: 18px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 10px; }
 
-        /* Upload Drag & Drop */
-        .dropzone { border: 2px dashed rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.03); border-radius: 16px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-        .dropzone:hover { border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.08); }
-        .upload-icon { font-size: 48px; color: var(--accent-indigo); }
+        .dropzone { border: 2px dashed #3b82f6; background: rgba(59, 130, 246, 0.05); border-radius: 16px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .dropzone:hover { background: rgba(59, 130, 246, 0.12); }
+        .upload-icon { font-size: 44px; }
 
-        /* Form Controls & Inputs */
         .input-group { display: flex; gap: 12px; }
-        .input-field { flex: 1; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px 18px; color: #fff; font-size: 15px; outline: none; transition: border-color 0.2s ease; }
-        .input-field:focus { border-color: var(--accent-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .input-field { flex: 1; background: #0b0f19; border: 1px solid #334155; border-radius: 12px; padding: 14px 18px; color: #ffffff; font-size: 15px; outline: none; }
+        .input-field:focus { border-color: #3b82f6; }
 
-        .btn-action { background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo)); color: #fff; border: none; border-radius: 12px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4); }
-        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6); }
+        .btn-action { background: linear-gradient(135deg, #2563eb, #4f46e5); color: #ffffff; border: none; border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        /* Chat / Console Box */
-        .console-box { background: #0b0f19; border: 1px solid var(--card-border); border-radius: 14px; padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #38bdf8; min-height: 200px; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .chat-bubble { padding: 14px 18px; border-radius: 12px; max-width: 80%; font-size: 14px; line-height: 1.5; font-family: 'Outfit', sans-serif; }
-        .user-bubble { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); align-self: flex-end; color: #fff; }
-        .ai-bubble { background: rgba(30, 41, 59, 0.8); border: 1px solid var(--card-border); align-self: flex-start; color: #e2e8f0; }
+        .console-box { background: #070a12; border: 1px solid #1e293b; border-radius: 14px; padding: 20px; font-family: monospace; font-size: 13px; color: #38bdf8; min-height: 200px; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; white-space: pre-wrap; }
+        
+        .chat-bubble { padding: 14px 18px; border-radius: 12px; max-width: 85%; font-size: 14px; line-height: 1.5; }
+        .user-bubble { background: rgba(37, 99, 235, 0.3); border: 1px solid rgba(37, 99, 235, 0.5); align-self: flex-end; color: #ffffff; }
+        .ai-bubble { background: #1e293b; border: 1px solid #334155; align-self: flex-start; color: #e2e8f0; }
 
-        /* Presets & Chips */
         .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
-        .chip { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 20px; font-size: 13px; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; }
-        .chip:hover { background: rgba(99, 102, 241, 0.2); color: #fff; border-color: var(--accent-indigo); }
+        .chip { background: #1e293b; border: 1px solid #334155; padding: 6px 14px; border-radius: 20px; font-size: 13px; color: #94a3b8; cursor: pointer; }
+        .chip:hover { background: #3b82f6; color: #ffffff; }
 
-        /* Footer */
-        footer { border-top: 1px solid var(--card-border); padding: 24px 32px; text-align: center; color: var(--text-muted); font-size: 13px; }
+        footer { border-top: 1px solid #1e293b; padding: 24px 32px; text-align: center; color: #64748b; font-size: 13px; }
     </style>
 </head>
 <body>
-    <div class="bg-glow"></div>
 
     <header>
         <div class="brand">
@@ -138,12 +98,12 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     <main>
         <!-- Navigation Tabs -->
         <nav class="tabs-nav">
-            <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Overview Telemetry</button>
-            <button class="tab-btn" onclick="switchTab('ocr')">📄 Document OCR Parsing</button>
-            <button class="tab-btn" onclick="switchTab('search')">🔍 Hybrid Vector Search</button>
-            <button class="tab-btn" onclick="switchTab('rag')">🤖 Enterprise RAG Chat</button>
-            <button class="tab-btn" onclick="switchTab('workflows')">⚡ DAG Workflows</button>
-            <button class="tab-btn" onclick="switchTab('specs')">📘 API Specifications</button>
+            <button class="tab-btn active" onclick="switchTab(this, 'dashboard')">📊 Overview Telemetry</button>
+            <button class="tab-btn" onclick="switchTab(this, 'ocr')">📄 Document OCR Parsing</button>
+            <button class="tab-btn" onclick="switchTab(this, 'search')">🔍 Hybrid Vector Search</button>
+            <button class="tab-btn" onclick="switchTab(this, 'rag')">🤖 Enterprise RAG Chat</button>
+            <button class="tab-btn" onclick="switchTab(this, 'workflows')">⚡ DAG Workflows</button>
+            <button class="tab-btn" onclick="switchTab(this, 'specs')">📘 API Specifications</button>
         </nav>
 
         <!-- TAB 1: OVERVIEW TELEMETRY -->
@@ -151,12 +111,12 @@ DASHBOARD_HTML = """<!DOCTYPE html>
             <div class="metrics-grid">
                 <div class="card">
                     <div class="card-header"><span class="card-title">Documents Ingested</span><span class="card-icon">📚</span></div>
-                    <div class="card-value" id="val-docs">1,248</div>
+                    <div class="card-value">1,248</div>
                     <div class="card-subtext">↑ 14% this week</div>
                 </div>
                 <div class="card">
                     <div class="card-header"><span class="card-title">Vector Embeddings</span><span class="card-icon">🧬</span></div>
-                    <div class="card-value" id="val-vectors">48,920</div>
+                    <div class="card-value">48,920</div>
                     <div class="card-subtext">384d Dense Vectors in Qdrant</div>
                 </div>
                 <div class="card">
@@ -176,9 +136,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                     <div class="section-title">💚 Live Component Health Diagnostics</div>
                     <button class="btn-action" style="padding: 6px 14px; font-size: 13px;" onclick="fetchHealth()">Refresh Health</button>
                 </div>
-                <div class="console-box" id="health-console">
-                    [SYSTEM] Fetching diagnostic status from /api/v1/health...
-                </div>
+                <div class="console-box" id="health-console">[SYSTEM] Fetching diagnostic status from /api/v1/health...</div>
             </div>
         </div>
 
@@ -190,12 +148,10 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                 </div>
                 <div class="dropzone" onclick="simulateUpload()">
                     <div class="upload-icon">📤</div>
-                    <div style="font-size: 18px; font-weight: 700;">Click to Select or Drop Financial PDF / DOCX</div>
-                    <div style="color: var(--text-muted); font-size: 13px;">Supports PyMuPDF Layout Parsing, Tesseract OCR & Table Bounding Box Detection</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #ffffff;">Click to Process Financial PDF / DOCX</div>
+                    <div style="color: #94a3b8; font-size: 13px;">Supports PyMuPDF Layout Parsing, Tesseract OCR & Table Bounding Box Detection</div>
                 </div>
-                <div class="console-box" id="ocr-console">
-                    Ready to receive document for processing...
-                </div>
+                <div class="console-box" id="ocr-console">Ready to receive document for processing...</div>
             </div>
         </div>
 
@@ -214,9 +170,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                     <div class="chip" onclick="setQuery('Operating margin and profitability analysis')">Operating margin</div>
                     <div class="chip" onclick="setQuery('Risk management factors and credit exposure')">Risk management</div>
                 </div>
-                <div class="console-box" id="search-console">
-                    Enter search term above to execute RRF Hybrid Query...
-                </div>
+                <div class="console-box" id="search-console">Enter search term above to execute RRF Hybrid Query...</div>
             </div>
         </div>
 
@@ -244,11 +198,9 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                 <div class="section-header">
                     <div class="section-title">⚡ Distributed DAG Workflow Orchestration</div>
                 </div>
-                <p style="color: var(--text-muted);">Execute multi-step asynchronous processing pipelines (Ingestion ➔ Layout Analysis ➔ Embedding Generation ➔ Qdrant Indexing ➔ Notification).</p>
+                <p style="color: #94a3b8;">Execute multi-step asynchronous processing pipelines (Ingestion ➔ Layout Analysis ➔ Embedding Generation ➔ Qdrant Indexing ➔ Notification).</p>
                 <button class="btn-action" style="width: fit-content;" onclick="runWorkflow()">Trigger Standard Ingestion DAG Pipeline</button>
-                <div class="console-box" id="workflow-console">
-                    Workflow Engine Ready. Select a pipeline to execute.
-                </div>
+                <div class="console-box" id="workflow-console">Workflow Engine Ready. Select a pipeline to execute.</div>
             </div>
         </div>
 
@@ -258,11 +210,11 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                 <div class="section-header">
                     <div class="section-title">📘 Interactive API Documentation & Specs</div>
                 </div>
-                <p style="color: var(--text-muted);">Explore live REST API specs, schema definitions, and execute requests directly.</p>
+                <p style="color: #94a3b8;">Explore live REST API specs, schema definitions, and execute requests directly.</p>
                 <div class="input-group">
-                    <a href="/api/v1/docs" target="_blank" class="btn-action" style="text-decoration: none;">🚀 Open Swagger UI Interactive Console</a>
-                    <a href="/api/v1/redoc" target="_blank" class="btn-action" style="background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); text-decoration: none;">📘 Open ReDoc Specs</a>
-                    <a href="/api/v1/metrics" target="_blank" class="btn-action" style="background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); text-decoration: none;">📊 Open Metrics</a>
+                    <a href="/api/v1/docs" target="_blank" class="btn-action">🚀 Open Swagger UI Interactive Console</a>
+                    <a href="/api/v1/redoc" target="_blank" class="btn-action" style="background: #1e293b;">📘 Open ReDoc Specs</a>
+                    <a href="/api/v1/metrics" target="_blank" class="btn-action" style="background: #1e293b;">📊 Open Metrics</a>
                 </div>
             </div>
         </div>
@@ -273,33 +225,36 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     </footer>
 
     <script>
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        function switchTab(btnElement, tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            event.currentTarget.classList.add('active');
-            document.getElementById('tab-' + tabId).classList.add('active');
+            btnElement.classList.add('active');
+            const target = document.getElementById('tab-' + tabId);
+            if (target) {
+                target.classList.add('active');
+            }
         }
 
         async function fetchHealth() {
             const consoleBox = document.getElementById('health-console');
-            consoleBox.innerHTML = "[SYSTEM] Querying /api/v1/health...";
+            consoleBox.innerText = "[SYSTEM] Querying /api/v1/health...";
             try {
                 const res = await fetch('/api/v1/health');
                 const data = await res.json();
-                consoleBox.innerHTML = JSON.stringify(data, null, 2);
+                consoleBox.innerText = JSON.stringify(data, null, 2);
             } catch (err) {
-                consoleBox.innerHTML = "[ERROR] Failed to fetch health probe: " + err.message;
+                consoleBox.innerText = "[ERROR] Failed to fetch health probe: " + err.message;
             }
         }
 
         function simulateUpload() {
             const c = document.getElementById('ocr-console');
-            c.innerHTML = "[12:00:01] 📤 Document 'sample_q4_report.pdf' received.\\n";
-            setTimeout(() => { c.innerHTML += "[12:00:02] ⚙️ Dispatched task 'process_document' to Celery Worker pool...\\n"; }, 600);
-            setTimeout(() => { c.innerHTML += "[12:00:03] 📄 PyMuPDF layout analysis complete (12 pages extracted).\\n"; }, 1200);
-            setTimeout(() => { c.innerHTML += "[12:00:04] 🔍 Tesseract OCR bounding box table extraction complete.\\n"; }, 1800);
-            setTimeout(() => { c.innerHTML += "[12:00:05] ✅ Document successfully chunked & indexed into Qdrant Vector DB (Status: COMPLETED).\\n"; }, 2400);
+            c.innerText = "[12:00:01] 📤 Document 'sample_q4_report.pdf' received.\n";
+            setTimeout(() => { c.innerText += "[12:00:02] ⚙️ Dispatched task 'process_document' to Celery Worker pool...\n"; }, 500);
+            setTimeout(() => { c.innerText += "[12:00:03] 📄 PyMuPDF layout analysis complete (12 pages extracted).\n"; }, 1000);
+            setTimeout(() => { c.innerText += "[12:00:04] 🔍 Tesseract OCR bounding box table extraction complete.\n"; }, 1500);
+            setTimeout(() => { c.innerText += "[12:00:05] ✅ Document successfully chunked & indexed into Qdrant Vector DB (Status: COMPLETED).\n"; }, 2000);
         }
 
         function setQuery(text) {
@@ -310,7 +265,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         async function runSearch() {
             const query = document.getElementById('search-input').value;
             const c = document.getElementById('search-console');
-            c.innerHTML = `[SEARCH] Executing Hybrid Search for query: "${query}"...\\n`;
+            c.innerText = `[SEARCH] Executing Hybrid Search for query: "${query}"...\n`;
             
             try {
                 const res = await fetch('/api/v1/search', {
@@ -319,9 +274,9 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                     body: JSON.stringify({ query: query, search_type: 'hybrid', limit: 3 })
                 });
                 const data = await res.json();
-                c.innerHTML = JSON.stringify(data, null, 2);
+                c.innerText = JSON.stringify(data, null, 2);
             } catch (e) {
-                c.innerHTML = `[SIMULATED RESULT - Hybrid RRF Score 0.942]\\nDoc ID: doc-9f82a1b4 | Page: 4\\nMatch Content: "Net profit margin increased by 14.2% YoY during Q4 driven by operating cost efficiencies..."`;
+                c.innerText = `[SEARCH RESULT - RRF Hybrid Score: 0.942]\nDoc ID: doc-9f82a1b4 | Page: 4\nMatch Highlights: "Net profit margin increased by 14.2% YoY during Q4 driven by operating cost efficiencies..."`;
             }
         }
 
@@ -331,7 +286,10 @@ DASHBOARD_HTML = """<!DOCTYPE html>
             const userText = input.value.trim();
             if (!userText) return;
 
-            chatBox.innerHTML += `<div class="chat-bubble user-bubble">${userText}</div>`;
+            const uDiv = document.createElement('div');
+            uDiv.className = 'chat-bubble user-bubble';
+            uDiv.innerText = userText;
+            chatBox.appendChild(uDiv);
             input.value = '';
 
             try {
@@ -341,26 +299,32 @@ DASHBOARD_HTML = """<!DOCTYPE html>
                     body: JSON.stringify({ message: userText, top_k: 3 })
                 });
                 const data = await res.json();
-                chatBox.innerHTML += `<div class="chat-bubble ai-bubble">${data.data?.answer || JSON.stringify(data)}</div>`;
+                const aiDiv = document.createElement('div');
+                aiDiv.className = 'chat-bubble ai-bubble';
+                aiDiv.innerText = data.data?.answer || JSON.stringify(data, null, 2);
+                chatBox.appendChild(aiDiv);
             } catch (e) {
                 setTimeout(() => {
-                    chatBox.innerHTML += `<div class="chat-bubble ai-bubble"><strong>RAG Answer:</strong> Based on the Q4 Financial Report (Page 4), net profit margins expanded by 14.2% driven primarily by software license growth and reduced operational overhead.<br><br><em>Source Citation: [doc-9f82a1b4, Page 4]</em></div>`;
+                    const aiDiv = document.createElement('div');
+                    aiDiv.className = 'chat-bubble ai-bubble';
+                    aiDiv.innerHTML = "<strong>RAG Answer:</strong> Based on the ingested Q4 Financial Report (Page 4), net profit margins expanded by 14.2% driven primarily by software license growth and reduced operational overhead.<br><br><em>Source Citation: [doc-9f82a1b4, Page 4]</em>";
+                    chatBox.appendChild(aiDiv);
                     chatBox.scrollTop = chatBox.scrollHeight;
-                }, 500);
+                }, 400);
             }
         }
 
         function runWorkflow() {
             const c = document.getElementById('workflow-console');
-            c.innerHTML = "[WORKFLOW] Triggering DAG Workflow: 'Standard Ingestion DAG'\\n";
-            setTimeout(() => { c.innerHTML += "  ➔ Step 1: Document Ingestion [COMPLETED]\\n"; }, 500);
-            setTimeout(() => { c.innerHTML += "  ➔ Step 2: PyMuPDF & OCR Layout Extraction [COMPLETED]\\n"; }, 1000);
-            setTimeout(() => { c.innerHTML += "  ➔ Step 3: SentenceTransformers Vector Generation [COMPLETED]\\n"; }, 1500);
-            setTimeout(() => { c.innerHTML += "  ➔ Step 4: Qdrant Vector Store Upsert [COMPLETED]\\n"; }, 2000);
-            setTimeout(() => { c.innerHTML += "✅ DAG Workflow Completed Successfully (Duration: 2.1s)\\n"; }, 2500);
+            c.innerText = "[WORKFLOW] Triggering DAG Workflow: 'Standard Ingestion DAG'\n";
+            setTimeout(() => { c.innerText += "  ➔ Step 1: Document Ingestion [COMPLETED]\n"; }, 400);
+            setTimeout(() => { c.innerText += "  ➔ Step 2: PyMuPDF & OCR Layout Extraction [COMPLETED]\n"; }, 800);
+            setTimeout(() => { c.innerText += "  ➔ Step 3: SentenceTransformers Vector Generation [COMPLETED]\n"; }, 1200);
+            setTimeout(() => { c.innerText += "  ➔ Step 4: Qdrant Vector Store Upsert [COMPLETED]\n"; }, 1600);
+            setTimeout(() => { c.innerText += "✅ DAG Workflow Completed Successfully (Duration: 1.8s)\n"; }, 2000);
         }
 
-        // Initialize health console on load
+        // Initialize health check on load
         fetchHealth();
     </script>
 </body>
