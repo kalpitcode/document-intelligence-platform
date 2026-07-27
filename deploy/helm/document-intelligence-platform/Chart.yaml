@@ -1,0 +1,9 @@
+apiVersion: v2
+name: document-intelligence-platform
+description: Enterprise AI Document Intelligence Platform Helm Chart
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+maintainers:
+  - name: BlackRock Platform Engineering
+    email: engineering@blackrock.com

@@ -1,59 +1,22 @@
-# ==============================================================================
-# Docker Ignore — Enterprise AI Document Intelligence Platform
-# ==============================================================================
-
-# Version control
 .git
 .gitignore
-
-# Python
+.dockerignore
+.venv
 __pycache__
-*.py[cod]
+*.pyc
 *.pyo
-*.egg-info
-dist/
-build/
-.venv/
-venv/
-.tox/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Environment
-.env
-.env.local
-.env.production
-
-# Testing
-tests/
-reports/
-htmlcov/
+*.pyd
+.pytest_cache
 .coverage
-
-# Documentation
-docs/
+htmlcov
+reports
+logs/*
+!logs/.gitkeep
+tmp/
+.env
+.env.*
+!.env.example
 *.md
-!README.md
-
-# CI/CD
-.github/
-.pre-commit-config.yaml
-
-# Docker
-docker-compose*.yml
-Dockerfile
-
-# Logs
-logs/
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
+deploy/
+docs/
+tests/

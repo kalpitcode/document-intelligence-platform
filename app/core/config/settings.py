@@ -207,7 +207,7 @@ class Settings(BaseSettings):
     # JWT & Authentication
     # ==========================================================================
     jwt_secret_key: str = Field(
-        default="SUPER_SECRET_JWT_KEY_PLEASE_CHANGE_IN_PRODUCTION_BLACKROCK_ALADDIN",
+        default="CHANGE_ME_JWT_SECRET_KEY_PRODUCTION_BLACKROCK_ALADDIN",
         description="Secret key for signing JWT tokens",
     )
     jwt_algorithm: str = Field(

@@ -1,90 +1,83 @@
 # ==============================================================================
-# Enterprise AI Document Intelligence Platform — Dockerfile
-# ==============================================================================
-# Multi-stage build for minimal production image size and security.
-#
-# Stage 1 (builder): Install dependencies with Poetry
-# Stage 2 (production): Slim Python image with only runtime dependencies
-#
-# Build:  docker build -t document-intelligence:latest .
-# Run:    docker run -p 8000:8000 --env-file .env document-intelligence:latest
+# Multi-Stage Production Dockerfile for Enterprise AI Document Intelligence Platform
 # ==============================================================================
 
-# ---------------------------------------------------------------------------
-# Stage 1: Builder — Install Python dependencies
-# ---------------------------------------------------------------------------
+# --- Stage 1: Build Environment ---
 FROM python:3.12-slim AS builder
-
-# Prevent Python from writing .pyc files and enable unbuffered stdout
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
 
 WORKDIR /build
 
-# Install system dependencies for building Python packages
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        libpq-dev \
-        curl && \
-    rm -rf /var/lib/apt/lists/*
+# Install system dependencies required for compilation
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    libpq-dev \
+    tesseract-ocr \
+    libtesseract-dev \
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
-ENV POETRY_VERSION=1.8.4 \
+ENV POETRY_VERSION=1.8.3 \
     POETRY_HOME="/opt/poetry" \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=false
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_NO_INTERACTION=1
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="$POETRY_HOME/bin:$PATH"
 
-# Copy dependency files first (cache layer)
+# Copy dependency specifications
 COPY pyproject.toml poetry.lock* ./
 
-# Install dependencies (no dev dependencies for production)
-RUN poetry install --no-root --only main --no-interaction --no-ansi
+# Install production dependencies only
+RUN poetry install --only main --no-root
 
-# ---------------------------------------------------------------------------
-# Stage 2: Production — Slim runtime image
-# ---------------------------------------------------------------------------
-FROM python:3.12-slim AS production
 
-# Prevent Python from writing .pyc files and enable unbuffered stdout
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+# --- Stage 2: Production Minimal Runtime ---
+FROM python:3.12-slim AS runner
 
-# Install runtime-only system dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        libpq5 \
-        curl && \
-    rm -rf /var/lib/apt/lists/*
+LABEL maintainer="BlackRock Engineering <engineering@blackrock.com>"
+LABEL version="0.1.0"
+LABEL description="Enterprise AI Document Intelligence Platform Runtime Container"
 
-# Create non-root user for security
-RUN groupadd --gid 1000 appuser && \
-    useradd --uid 1000 --gid appuser --shell /bin/bash --create-home appuser
+# Install runtime system libraries (OCR engine, Poppler for PDF rendering, libpq)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    tesseract-ocr \
+    poppler-utils \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy installed Python packages from builder
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+# Create non-root user and group for container security isolation
+RUN groupadd -g 10001 dipgroup && \
+    useradd -u 10001 -g dipgroup -s /bin/bash -m dipuser
 
-# Copy application code
-COPY --chown=appuser:appuser . .
+# Copy virtual environment from builder stage
+COPY --from=builder /build/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/app:$PYTHONPATH"
 
-# Create log directory
-RUN mkdir -p /app/logs && chown -R appuser:appuser /app/logs
+# Copy application source code and entrypoint
+COPY --chown=dipuser:dipgroup app /app/app
+COPY --chown=dipuser:dipgroup migrations /app/migrations
+COPY --chown=dipuser:dipgroup alembic.ini /app/alembic.ini
+
+# Create logs directory with proper non-root permissions
+RUN mkdir -p /app/logs && chown -R dipuser:dipgroup /app
 
 # Switch to non-root user
-USER appuser
+USER dipuser:dipgroup
 
-# Expose application port
+# Expose HTTP port
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+# Container Healthcheck probe
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:8000/api/v1/health/live || exit 1
 
-# Start the application
+# Default execution command
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

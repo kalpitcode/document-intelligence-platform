@@ -1,0 +1,56 @@
+replicaCount: 3
+
+image:
+  repository: ghcr.io/kalpitcode/document-intelligence-platform
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+serviceAccount:
+  create: true
+  name: "dip-service-account"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  hosts:
+    - host: dip.blackrock.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: dip-tls-secret
+      hosts:
+        - dip.blackrock.com
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 15
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+env:
+  APP_ENV: "production"
+  LOG_LEVEL: "INFO"
+  PROMETHEUS_ENABLED: "true"
+  OPENTELEMETRY_ENABLED: "true"
+  RATE_LIMITING_ENABLED: "true"
+
+secrets:
+  postgresPassword: "PRODUCTION_SECURE_POSTGRES_PASSWORD"
+  jwtSecretKey: "PRODUCTION_SECURE_JWT_SECRET_KEY_BLACKROCK"
