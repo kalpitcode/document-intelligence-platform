@@ -19,6 +19,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+# Environment variables for Python & memory optimization in 512MB containers
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    MALLOC_ARENA_MAX=2
+
 WORKDIR /app
 
 # Copy requirements and install via pip with no cache for maximum speed
