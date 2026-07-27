@@ -135,6 +135,11 @@ def create_application() -> FastAPI:
         prefix=settings.api_v1_prefix,
     )
 
+    @application.get("/", include_in_schema=False)
+    async def root_redirect():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url=f"{settings.api_v1_prefix}/docs")
+
     logger.info(
         "Application factory complete",
         extra={
