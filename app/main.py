@@ -136,9 +136,48 @@ def create_application() -> FastAPI:
     )
 
     @application.get("/", include_in_schema=False)
-    async def root_redirect():
-        from fastapi.responses import RedirectResponse
-        return RedirectResponse(url=f"{settings.api_v1_prefix}/docs")
+    async def root_portal():
+        from fastapi.responses import HTMLResponse
+        html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise AI Document Intelligence Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 40px; max-width: 650px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); text-align: center; }
+        .badge { background: #0284c7; color: #ffffff; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 20px; }
+        h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; color: #ffffff; }
+        p { color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px; }
+        .btn { display: flex; align-items: center; justify-content: center; padding: 14px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; transition: all 0.2s ease; font-size: 14px; }
+        .btn-primary { background: #2563eb; color: #ffffff; grid-column: span 2; }
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); }
+        .btn-secondary { background: #334155; color: #e2e8f0; }
+        .btn-secondary:hover { background: #475569; transform: translateY(-2px); }
+        .footer { font-size: 12px; color: #64748b; border-top: 1px solid #334155; padding-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <span class="badge">Enterprise Production API</span>
+        <h1>AI Document Intelligence Platform</h1>
+        <p>Production-ready distributed OCR parsing, hybrid vector search, retrieval-augmented generation (RAG), and DAG workflow engine.</p>
+        <div class="grid">
+            <a href="/api/v1/docs" class="btn btn-primary">🚀 Launch Interactive OpenAPI Docs (Swagger)</a>
+            <a href="/api/v1/redoc" class="btn btn-secondary">📘 ReDoc API Specs</a>
+            <a href="/api/v1/health" class="btn btn-secondary">💚 System Health Probe</a>
+        </div>
+        <div class="footer">
+            BlackRock Architecture Engine &bull; Environment: Production &bull; Status: Active
+        </div>
+    </div>
+</body>
+</html>"""
+        return HTMLResponse(content=html_content)
 
     logger.info(
         "Application factory complete",
