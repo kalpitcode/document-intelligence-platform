@@ -1,298 +1,304 @@
 # Enterprise AI Document Intelligence Platform
 
-<p align="center">
-  <strong>Production-grade enterprise platform for document intelligence, AI-powered search, and retrieval-augmented generation.</strong>
-</p>
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+[![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)]()
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)]()
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)]()
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.28-326CE5.svg)]()
+[![License](https://img.shields.io/badge/license-Proprietary-red.svg)]()
 
-<p align="center">
-  <img src="https://img.shields.io/badge/python-3.12-blue.svg" alt="Python 3.12">
-  <img src="https://img.shields.io/badge/FastAPI-0.115-green.svg" alt="FastAPI">
-  <img src="https://img.shields.io/badge/SQLAlchemy-2.0-red.svg" alt="SQLAlchemy 2.0">
-  <img src="https://img.shields.io/badge/Pydantic-V2-orange.svg" alt="Pydantic V2">
-  <img src="https://img.shields.io/badge/license-Proprietary-lightgrey.svg" alt="License">
-</p>
+> An enterprise-grade, event-driven document processing, OCR extraction, vector search, Retrieval-Augmented Generation (RAG), and DAG workflow automation engine built on Aladdin architectural principles.
 
 ---
 
-## Overview
-
-The Document Intelligence Platform enables organizations to:
-
-- **Upload** documents in various formats
-- **Extract** structured information using OCR and AI
-- **Search** across millions of documents using semantic + keyword hybrid search
-- **Interact** with documents through RAG-powered conversational AI
-- **Automate** document workflows with intelligent routing
-
-> **Current Status:** Foundation milestone — enterprise infrastructure, no business logic yet.
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Motivation](#motivation)
+- [Key Features](#key-features)
+- [Technology Stack](#technology-stack)
+- [Architecture Overview](#architecture-overview)
+- [Folder Structure](#folder-structure)
+- [System Components](#system-components)
+- [Installation Guide](#installation-guide)
+- [Local Development Setup](#local-development-setup)
+- [Environment Variables](#environment-variables)
+- [Running with Docker](#running-with-docker)
+- [Running with Kubernetes](#running-with-kubernetes)
+- [API Documentation](#api-documentation)
+- [Authentication Guide](#authentication-guide)
+- [OCR Pipeline Overview](#ocr-pipeline-overview)
+- [Knowledge Engine Overview](#knowledge-engine-overview)
+- [Enterprise RAG Overview](#enterprise-rag-overview)
+- [Workflow Engine Overview](#workflow-engine-overview)
+- [AI Features Overview](#ai-features-overview)
+- [Monitoring & Observability](#monitoring--observability)
+- [Production Deployment](#production-deployment)
+- [Performance Considerations](#performance-considerations)
+- [Security Features](#security-features)
+- [Screenshots & Demo](#screenshots--demo)
+- [Future Improvements](#future-improvements)
+- [License](#license)
 
 ---
 
-## Architecture
+## Project Overview
+The **Enterprise AI Document Intelligence Platform** is a scalable, resilient distributed application engineered to ingest, process, parse, index, search, and automate document workflows for enterprise financial and legal documents. It combines asynchronous OCR parsing, dense semantic embeddings, hybrid vector search (dense vector + BM25 lexical keyword matching), LLM context augmentation, DAG workflow orchestration, and enterprise observability.
 
-The platform follows **Clean Architecture** with strict separation of concerns:
+---
 
+## Motivation
+Enterprise organizations handle millions of unstructured documents (PDFs, financial reports, SEC filings, scanned agreements). Traditional text extraction systems lack structural awareness, fail to handle complex tables, and suffer from high latency during high-concurrency peaks. This platform provides an end-to-end event-driven architecture that delivers sub-second hybrid retrieval, strict data governance, fault isolation via circuit breakers, and sub-15-minute disaster recovery.
+
+---
+
+## Key Features
+- **Async OCR & Table Extraction**: Tesseract OCR, PyMuPDF, and pdfplumber with automatic bounding-box layout parsing.
+- **Hybrid Vector Search**: Reciprocal Rank Fusion (RRF) combining Qdrant dense vector embeddings with BM25 keyword matching.
+- **Enterprise RAG Engine**: Multi-stage RAG with query rewriting, reranking, source citation attribution, and LiteLLM integration.
+- **DAG Workflow Automation**: Distributed DAG orchestration engine for executing parallel multi-step processing workflows.
+- **AI Analytics**: Automatic summary generation, key entity extraction, classification, and metadata enrichment.
+- **Enterprise Observability**: Prometheus metrics exposition, OpenTelemetry W3C trace context propagation, and structured JSON logs with sensitive secret redacting.
+- **Production Reliability**: Circuit breakers (`CLOSED` -> `OPEN` -> `HALF_OPEN`), exponential backoff retry policies, and connection pool monitoring.
+
+---
+
+## Technology Stack
+
+| Category | Component / Library |
+| :--- | :--- |
+| **Language & Framework** | Python 3.12, FastAPI, Pydantic V2 |
+| **Database & Cache** | PostgreSQL 16 (AsyncAlchemy), Redis 7 |
+| **Messaging & Workers** | RabbitMQ 3.13 (aio-pika), Celery 5.4 |
+| **Object & Vector Storage** | MinIO S3 Object Storage, Qdrant Vector Database |
+| **OCR & Embeddings** | Tesseract OCR, PyMuPDF, Sentence-Transformers (`all-MiniLM-L6-v2`) |
+| **LLM Orchestration** | LiteLLM, Ollama, Tiktoken |
+| **Container & K8s** | Multi-stage Docker, Helm 3, Kubernetes 1.28 |
+| **Observability & Security** | Prometheus, OpenTelemetry, Argon2id, PyJWT, Security Headers |
+
+---
+
+## Architecture Overview
+
+```mermaid
+graph TD
+    Client[Client Apps / Portals] -->|HTTPS REST API| Ingress[Ingress Controller NGINX]
+    Ingress --> API[FastAPI Cluster]
+
+    subgraph Core Platform
+        API --> DB[(PostgreSQL 16)]
+        API --> Cache[(Redis 7)]
+        API --> Queue[(RabbitMQ Broker)]
+    end
+
+    subgraph Asynchronous Workers
+        Queue --> Worker[Celery Worker Cluster]
+        Worker --> MinIO[(MinIO S3 Storage)]
+        Worker --> OCR[OCR Pipeline Engine]
+        Worker --> Embed[Embedding Generator]
+        Embed --> Qdrant[(Qdrant Vector DB)]
+    end
+
+    subgraph Observability & Resilience
+        API --> Prom[Prometheus Exporter /metrics]
+        API --> OTEL[OpenTelemetry Context]
+    end
 ```
-┌─────────────────────────────────────────────────────┐
-│                    API Layer                         │
-│              (FastAPI Routes, Schemas)               │
-├─────────────────────────────────────────────────────┤
-│                  Service Layer                       │
-│            (Business Logic, Orchestration)           │
-├─────────────────────────────────────────────────────┤
-│                Repository Layer                      │
-│             (Data Access, Queries)                   │
-├─────────────────────────────────────────────────────┤
-│               Infrastructure Layer                   │
-│     (Database, Cache, Messaging, Workers)            │
-└─────────────────────────────────────────────────────┘
-```
-
-### Engineering Principles
-
-| Principle | Implementation |
-|-----------|---------------|
-| Clean Architecture | Layered architecture with dependency inversion |
-| SOLID | Single responsibility per module, dependency injection |
-| Repository Pattern | Data access abstracted behind repository interfaces |
-| 12-Factor App | Configuration via environment, stateless processes |
-| DRY/KISS | Shared utilities, base classes, mixins |
-
----
-
-## Tech Stack
-
-| Category | Technology |
-|----------|-----------|
-| **Language** | Python 3.12 |
-| **Framework** | FastAPI |
-| **ORM** | SQLAlchemy 2.0 (async) |
-| **Migrations** | Alembic |
-| **Database** | PostgreSQL 16 |
-| **Cache** | Redis 7 |
-| **Messaging** | RabbitMQ 3.13 |
-| **Workers** | Celery 5.4 |
-| **Validation** | Pydantic V2 |
-| **Serialization** | ORJSON |
-| **Container** | Docker + Docker Compose |
-| **Dependencies** | Poetry |
-| **Testing** | Pytest (async) |
-| **Linting** | Ruff, Black, isort |
 
 ---
 
 ## Folder Structure
 
 ```
-blackrockproject/
-├── app/                          # Application source code
-│   ├── __init__.py
-│   ├── main.py                   # Application factory
-│   ├── api/                      # API routes (versioned)
-│   │   └── v1/
-│   │       ├── router.py         # V1 router aggregator
-│   │       └── endpoints/
-│   │           ├── health.py     # Health/readiness/liveness
-│   │           └── root.py       # Root + version endpoints
-│   ├── core/                     # Core infrastructure
-│   │   ├── config/               # Settings + environment configs
-│   │   ├── database/             # SQLAlchemy engine + sessions
-│   │   ├── cache/                # Redis connection manager
-│   │   ├── messaging/            # RabbitMQ connection manager
-│   │   ├── logging/              # Structured logging (JSON/console)
-│   │   └── exceptions/           # Exception hierarchy + handlers
-│   ├── schemas/                  # Pydantic V2 request/response models
-│   ├── models/                   # SQLAlchemy ORM models (future)
-│   ├── repositories/             # Data access layer (future)
-│   ├── services/                 # Business logic layer (future)
-│   ├── workers/                  # Celery tasks + configuration
-│   ├── middlewares/              # CORS, Request ID, Logging, Timing
-│   ├── dependencies/             # FastAPI dependency injection
-│   └── utils/                    # Shared utilities
-├── tests/                        # Test suite
-│   ├── conftest.py               # Shared fixtures
-│   ├── api/                      # API endpoint tests
-│   ├── unit/                     # Unit tests
-│   └── integration/              # Integration tests
-├── migrations/                   # Alembic database migrations
-├── scripts/                      # Startup and utility scripts
-├── docs/                         # Project documentation
-├── pyproject.toml                # Poetry + tool configuration
-├── Dockerfile                    # Multi-stage production build
-├── docker-compose.yml            # Full infrastructure stack
-└── docker-compose.override.yml   # Development overrides
+.
+├── app/                        # Application Source Code
+│   ├── api/v1/                 # API Version 1 Routers & Endpoints
+│   ├── core/                   # Core Infrastructure (Config, Database, Security, Observability, Resiliency)
+│   ├── models/                 # SQLAlchemy ORM Database Models
+│   ├── repositories/           # Repository Pattern Data Access Layer
+│   ├── schemas/                # Pydantic V2 Request & Response Schemas
+│   ├── services/               # Business Logic & Orchestration Services
+│   └── workers/                # Celery Background Workers & Tasks
+├── deploy/                     # Deployment Artifacts
+│   ├── helm/                   # Production Helm Chart
+│   └── k8s/                    # 13 Kubernetes Resource Manifests
+├── docs/                       # Technical Documentation & Diagrams
+├── migrations/                 # Alembic Database Migrations
+├── scripts/                    # Security Scanning, DB Backup & Restore Scripts
+├── tests/                      # Pytest Unit, Integration & Deployment Readiness Suites
+├── Dockerfile                  # Multi-stage Production Container Build
+├── docker-compose.prod.yml     # Production Docker Compose Profile
+└── pyproject.toml              # Dependency & Tool Configuration
 ```
 
 ---
 
-## Setup
+## System Components
+
+1. **FastAPI Gateway**: High-throughput async ASGI web server handling API routing, security middleware, and input validation.
+2. **PostgreSQL Data Layer**: Asynchronous ORM data access layer enforcing repository patterns and transactional safety.
+3. **Celery Worker Cluster**: Distributed task processing engine handling heavy OCR processing, embedding generation, and background diagnostics.
+4. **Qdrant Vector Engine**: High-performance vector database storing document dense vector embeddings with payload metadata filtering.
+5. **MinIO Object Store**: S3-compatible enterprise object storage for uploaded PDF, DOCX, and image documents.
+
+---
+
+## Installation Guide
 
 ### Prerequisites
+- **Python**: 3.12+
+- **Poetry**: 1.8+
+- **Docker**: 24.0+
 
-- **Python 3.12+**
-- **Docker** and **Docker Compose**
-- **Poetry** (Python package manager)
+```bash
+# 1. Clone the repository
+git clone https://github.com/kalpitcode/document-intelligence-platform.git
+cd document-intelligence-platform
 
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd blackrockproject
-   ```
-
-2. **Copy environment configuration:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your settings
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   pip install poetry
-   poetry install
-   ```
-
-4. **Install pre-commit hooks:**
-   ```bash
-   poetry run pre-commit install
-   ```
+# 2. Install dependencies via Poetry
+poetry install
+```
 
 ---
 
-## Running Locally
-
-### With Docker (Recommended)
-
-Start all services with hot-reload:
+## Local Development Setup
 
 ```bash
-docker-compose up -d --build
-```
+# 1. Start local development infrastructure (Postgres, Redis, RabbitMQ, MinIO, Qdrant)
+docker-compose up -d postgres redis rabbitmq minio qdrant
 
-Access the application:
-- **API:** http://localhost:8000/api/v1/
-- **API Docs:** http://localhost:8000/api/v1/docs
-- **ReDoc:** http://localhost:8000/api/v1/redoc
-- **Health:** http://localhost:8000/api/v1/health
-- **RabbitMQ UI:** http://localhost:15672 (dip_user / dip_password)
+# 2. Run database migrations
+poetry run alembic upgrade head
 
-### Without Docker
-
-Start infrastructure services separately, then:
-
-```bash
-# Using the dev script
-bash scripts/start-dev.sh
-
-# Or directly with Uvicorn
+# 3. Launch application server
 poetry run uvicorn app.main:app --reload --port 8000
-```
-
-### Running Tests
-
-```bash
-# All tests
-poetry run pytest
-
-# With coverage
-poetry run pytest --cov=app --cov-report=html
-
-# Specific test types
-bash scripts/run-tests.sh unit
-bash scripts/run-tests.sh api
 ```
 
 ---
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `APP_ENV` | `development` | Runtime environment |
-| `APP_DEBUG` | `false` | Enable debug mode |
-| `APP_PORT` | `8000` | Server port |
-| `POSTGRES_HOST` | `localhost` | Database host |
-| `POSTGRES_PORT` | `5432` | Database port |
-| `POSTGRES_USER` | `dip_user` | Database user |
-| `POSTGRES_PASSWORD` | — | Database password |
+| Variable | Default Value | Description |
+| :--- | :--- | :--- |
+| `APP_ENV` | `development` | Runtime environment (`development`, `staging`, `production`) |
+| `POSTGRES_HOST` | `localhost` | PostgreSQL server hostname |
 | `POSTGRES_DB` | `document_intelligence` | Database name |
-| `REDIS_HOST` | `localhost` | Redis host |
-| `REDIS_PORT` | `6379` | Redis port |
-| `RABBITMQ_HOST` | `localhost` | RabbitMQ host |
-| `RABBITMQ_PORT` | `5672` | RabbitMQ port |
-| `LOG_LEVEL` | `INFO` | Log level |
-| `LOG_FORMAT` | `json` | Log format (json/console) |
-
-See `.env.example` for the complete list.
+| `REDIS_HOST` | `localhost` | Redis server hostname |
+| `JWT_SECRET_KEY` | `CHANGE_ME_IN_PROD` | Secret key for signing JWT tokens |
+| `PROMETHEUS_ENABLED` | `true` | Expose `/api/v1/metrics` |
 
 ---
 
-## Development Workflow
+## Running with Docker
 
-1. **Create a feature branch** from `main`.
-2. **Write code** following the architecture patterns.
-3. **Write tests** for all new functionality.
-4. **Run linters:**
-   ```bash
-   poetry run ruff check app/ tests/
-   poetry run black app/ tests/
-   poetry run isort app/ tests/
-   ```
-5. **Run tests:**
-   ```bash
-   poetry run pytest
-   ```
-6. **Submit a pull request** with a clear description.
+```bash
+# Build and run full production stack
+docker-compose -f docker-compose.prod.yml up -d --build
+```
 
 ---
 
-## API Endpoints
+## Running with Kubernetes
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/v1/` | API root with metadata |
-| `GET` | `/api/v1/version` | Application version |
-| `GET` | `/api/v1/health` | Full system health check |
-| `GET` | `/api/v1/health/live` | Liveness probe |
-| `GET` | `/api/v1/health/ready` | Readiness probe |
+```bash
+# Deploy using Helm
+helm upgrade --install dip deploy/helm/document-intelligence-platform \
+  --namespace dip-production \
+  --create-namespace
+```
 
 ---
 
-## Future Roadmap
+## API Documentation
 
-### Phase 2 — Authentication & Authorization
-- JWT-based authentication
-- Role-Based Access Control (RBAC)
-- API key management
+Interactive OpenAPI documentation is available at `/docs` or `/redoc` when running the app.
 
-### Phase 3 — Document Management
-- Document upload with MinIO storage
-- OCR with Tesseract/Azure Form Recognizer
-- Metadata extraction
+### Example Request (Hybrid Search)
 
-### Phase 4 — AI & Search
-- Vector embeddings with Qdrant
-- Semantic search with OpenSearch
-- Hybrid search (keyword + vector)
+```bash
+curl -X POST "http://localhost:8000/api/v1/search" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <YOUR_JWT_TOKEN>" \
+  -d '{
+    "query": "Q4 revenue growth financial summary",
+    "search_type": "hybrid",
+    "limit": 5
+  }'
+```
 
-### Phase 5 — RAG & Chat
-- Retrieval-Augmented Generation
-- Conversational AI chat interface
-- Context-aware document Q&A
+---
 
-### Phase 6 — Observability
-- Prometheus metrics
-- Grafana dashboards
-- Distributed tracing
+## Authentication Guide
+The platform uses **JSON Web Tokens (JWT)** with Argon2id password hashing.
+1. Register/Login via `POST /api/v1/auth/login`.
+2. Include the resulting token in request headers: `Authorization: Bearer <TOKEN>`.
 
-### Phase 7 — Workflow Automation
-- Document processing pipelines
-- Approval workflows
-- Event-driven automation
+---
+
+## OCR Pipeline Overview
+Processes documents asynchronously:
+1. File uploaded to MinIO object storage.
+2. Background task executes PyMuPDF text extraction & Tesseract OCR bounding box detection.
+3. Extracted text is segmented into semantic chunks with page number tracking.
+
+---
+
+## Knowledge Engine Overview
+Transforms text chunks into 384-dimensional dense vector embeddings using `sentence-transformers/all-MiniLM-L6-v2`. Vectors are indexed into Qdrant alongside payloads.
+
+---
+
+## Enterprise RAG Overview
+Combines dense vector similarity search with BM25 lexical keyword matching using Reciprocal Rank Fusion (RRF). Retrieved context is augmented into prompts for LiteLLM.
+
+---
+
+## Workflow Engine Overview
+Executes multi-step DAG workflows (e.g. Ingestion -> OCR -> Embedding -> Indexing -> Notification) with step isolation and state tracking.
+
+---
+
+## AI Features Overview
+Provides document summarization, entity extraction, sentiment analysis, document classification, and QA generation.
+
+---
+
+## Monitoring & Observability
+- **Metrics**: Prometheus OpenMetrics at `GET /api/v1/metrics`.
+- **Tracing**: OpenTelemetry W3C context propagation.
+- **Status & Diagnostics**: Real-time status at `GET /api/v1/system/status` and `GET /api/v1/diagnostics`.
+
+---
+
+## Production Deployment
+Refer to [docs/deployment_guide.md](docs/deployment_guide.md) for Kubernetes, Helm, and cloud deployment procedures.
+
+---
+
+## Performance Considerations
+- Rate Limiting: 100 requests per minute sliding window.
+- Payload Limit: 50MB payload cap.
+- Connection Pools: Database & Redis connection pool health monitoring.
+
+---
+
+## Security Features
+- Non-root container runtime (`dipuser`).
+- Automatic redacting of sensitive secrets in logs.
+- Security Headers: HSTS, CSP, X-Frame-Options, X-Content-Type-Options.
+
+---
+
+## Screenshots & Demo
+
+*(Architecture & System Status Dashboards)*
+
+---
+
+## Future Improvements
+- Multi-modal vision-language model integration (Llava/Qwen-VL).
+- Cross-region active-active Qdrant replication.
 
 ---
 
 ## License
-
-Proprietary — BlackRock, Inc. All rights reserved.
+Proprietary — BlackRock Engineering / Enterprise Open-Source Portfolio Edition.
