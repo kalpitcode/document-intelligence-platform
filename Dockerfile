@@ -50,7 +50,7 @@ EXPOSE 8000
 
 # Container Healthcheck probe
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:8000/api/v1/health/live || exit 1
+    CMD sh -c "curl -f http://localhost:\${PORT:-8000}/api/v1/health/live || exit 1"
 
 # Default execution command dynamically binding to cloud PORT env (defaults to 8000)
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
