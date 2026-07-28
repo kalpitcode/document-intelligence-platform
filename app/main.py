@@ -25,8 +25,10 @@ import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_v1_router
 from app.core.cache import redis_manager
@@ -134,6 +136,11 @@ def create_application() -> FastAPI:
         api_v1_router,
         prefix=settings.api_v1_prefix,
     )
+
+    # Mount static assets directory for web UI
+    static_dir = Path("app/static")
+    if static_dir.exists():
+        application.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
     from app.api.v1.endpoints.web_ui import router as web_ui_router
     application.include_router(web_ui_router)
