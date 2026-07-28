@@ -78,13 +78,11 @@ class RabbitMQManager:
                 },
             )
         except Exception as exc:
-            logger.error(
-                "Failed to connect to RabbitMQ",
-                exc_info=exc,
-                extra={
-                    "host": settings.rabbitmq_host,
-                    "port": settings.rabbitmq_port,
-                },
+            logger.warning(
+                "RabbitMQ connection not available (%s:%s) - %s. Proceeding without message broker.",
+                settings.rabbitmq_host,
+                settings.rabbitmq_port,
+                str(exc),
             )
             # Don't raise — let the app start without RabbitMQ.
             # Health endpoint will report unhealthy status.
